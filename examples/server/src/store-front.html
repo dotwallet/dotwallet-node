@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+      integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk"
+      crossorigin="anonymous"
+    />
+    <title>Store</title>
+  </head>
+
+  <body>
+    <nav class="navbar navbar navbar-dark bg-dark">
+      <a class="navbar-brand" href="/">
+        <img src="./assets/logo/awesome-logo.svg" width="30" height="30" alt="" />
+      </a>
+      <ul class="navbar-nav">
+        <li class="nav-item"><a id="store-link" class="nav-link">Store</a></li>
+      </ul>
+    </nav>
+
+    <div class="container d-flex d-flex flex-column align-items-center justify-content-center">
+      <h1>Products</h1>
+      <ul class="list-group">
+        <li class="list-group-item mb-2 d-flex">
+          Bananas
+          <img class="mr-auto ml-2" src="./assets/bananas.png" alt="bananas" width="50px" />
+          546 satoshis
+          <button class="btn btn-secondary btn-sm mx-2" id="banana-button" type="button">
+            single pay
+          </button>
+          <button class="btn btn-secondary btn-sm" id="autopay-button" type="button">
+            auto pay
+          </button>
+        </li>
+        <li class="list-group-item mb-2 d-flex">
+          More Bananas
+          <img class="mr-auto ml-2" src="./assets/bananas.png" alt="bananas" width="50px" />
+          746 satoshis
+          <button disabled class="btn btn-secondary btn-sm mx-2" type="button">single pay</button>
+          <button disabled class="btn btn-secondary btn-sm" type="button">auto pay</button>
+        </li>
+        <li class="list-group-item mb-2 d-flex">
+          Yet More Bananas
+          <img class="mr-auto ml-2" src="./assets/bananas.png" alt="bananas" width="50px" />
+          946 satoshis
+          <button disabled class="btn btn-secondary btn-sm mx-2" type="button">single pay</button>
+          <button disabled class="btn btn-secondary btn-sm" type="button">auto pay</button>
+        </li>
+
+        <p id="order-status"></p>
+        <a id="check-data-link"></a>
+        <button class="btn btn-outline-primary btn-lg mt-5" type="button" id="save-data">
+          Record today's prices on the blockchain
+        </button>
+        <button
+          class="btn btn-outline-primary btn-lg mt-5"
+          style="display: none"
+          type="button"
+          id="check-data"
+        >
+          Check data saved on the blockchain
+        </button>
+        <p id="check-data-display"></p>
+      </ul>
+    </div>
+
+    <script src="https://unpkg.com/uuid@latest/dist/umd/uuidv4.min.js"></script>
+    <script src="./config.js"></script>
+
+    <script>
+      // Payments
+      document.getElementById('store-link').href = window.location.origin + '/store-front';
+      // basic payment order info
+      const orderData = {
+        out_order_id: uuidv4(),
+        coin_type: 'BSV',
+        to: [
+          {
+            type: 'address',
+            content: '1L3z6DzHpfr7pkkZmKfVNMjwY1984D5YRv',
+            amount: 5460000000,
+          },
+        ],
+        product: {
+          id: uuidv4(),
+          name: 'bananas',
+          detail: 'A lovely bunch of bananas',
+        },
+        subject: 'an order of fresh bananas',
+        notify_url: APP_URL + '/payment-result', // replace  with your IP
+      };
+
+      // single payment order
+      document.getElementById('banana-button').addEventListener('click', async () => {
+        document.getElementById('order-status').innerText = '';
+
+        const orderSnResponse = await fetch(
+          APP_URL + '/create-order', // replace with your IP
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              ...orderData,
+              redirect_uri: window.location.href, // replace with your IP
+              expires: 0,
+            }),
+            headers: {
+              'Content-type': 'application/json; charset=UTF-8',
+            },
+          }
+        );
+        const orderSnData = await orderSnResponse.json();
+        console.log('orderSnData', orderSnData);
+
+        if (orderSnData.data) {
+          window.location.href = `${DOTWALLET_API}/v1/transact/order/apply_payment?order_id=${orderSnData.data}`;
+        } else document.getElementById('order-status').innerText = 'error: ' + orderSnData.error;
+      });
+
+      // autopay
+      document.getElementById('autopay-button').addEventListener('click', async () => {
+        const autoPaymentResponse = await fetch(
+          APP_URL + '/create-autopayment', // replace with your IP
+          {
+            method: 'POST',
+            body: JSON.stringify({ ...orderData, user_id: localStorage.getItem('id') }),
+            headers: {
+              'Content-type': 'application/json; charset=UTF-8',
+            },
+          }
+        );
+        const autoPaymentResponseData = await autoPaymentResponse.json();
+        console.log(autoPaymentResponseData);
+        if (autoPaymentResponseData.txid)
+          document.getElementById('order-status').innerText = 'paid!';
+        else if (
+          autoPaymentResponseData.error &&
+          autoPaymentResponseData.error === 'balance too low'
+        )
+          window.location.href = `${DOTWALLET_CLIENT}/wallet/open/transfer?redirect_url=${window.location.href}`;
+        else document.getElementById('order-status').innerText = 'payment failed';
+      });
+    </script>
+    <script>
+      // Save data on chain (with autopay)
+      const saveData = {
+        bananas: 546,
+        moreBananas: 746,
+        yetMoreBananas: 946,
+      };
+      document.getElementById('save-data').addEventListener('click', async () => {
+        const response = await fetch(
+          APP_URL + '/save-data', // replace with your IP
+          {
+            method: 'POST',
+            body: JSON.stringify({ saveData, userId: localStorage.getItem('id') }),
+            headers: {
+              'Content-type': 'application/json; charset=UTF-8',
+            },
+          }
+        );
+        const responseData = await response.json();
+        console.log('saveDataResponseData', responseData);
+        if (responseData.txid) {
+          document.getElementById('order-status').innerText = `Saved!`;
+          document.getElementById(
+            'check-data-link'
+          ).href = `https://satoshi.io/tx/${responseData.txid}`;
+          document.getElementById('check-data-link').innerText = 'Check transaction';
+          document.getElementById('check-data').style = 'display: initial';
+          document.getElementById('check-data').addEventListener('click', () => {
+            checkData(responseData.txid);
+          });
+        } else if (responseData.error && responseData.error === 'balance too low')
+          window.location.href = `${DOTWALLET_CLIENT}/wallet/open/transfer?redirect_url=${window.location.href}`;
+        else document.getElementById('order-status').innerText = 'Saving failed';
+
+        async function checkData(txid) {
+          const response = await fetch(APP_URL + '/get-tx-data', {
+            method: 'POST',
+            body: JSON.stringify({ txid }),
+            headers: {
+              'Content-type': 'application/json; charset=UTF-8',
+            },
+          });
+          const data = await response.json();
+          console.log('checkDataResponseData', data);
+          document.getElementById('check-data-display').innerText = JSON.stringify(data);
+        }
+      });
+    </script>
+    <script
+      src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+      integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+      integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

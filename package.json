@@ -1,0 +1,44 @@
+{
+  "name": "dotwallet-node",
+  "version": "1.0.0",
+  "description": "SDK for backend servers interacting with DotWallet for Developers APIs",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib/**/*",
+    "examples/**/*"
+  ],
+  "scripts": {
+    "build": "rm -rf lib && tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dotwallet/dotwallet-node.git"
+  },
+  "keywords": [
+    "dotwallet",
+    "bitcoin",
+    "bitcoin",
+    "SV",
+    "BSV",
+    "crypto",
+    "wallet"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dotwallet/dotwallet-node/issues"
+  },
+  "homepage": "https://github.com/dotwallet/dotwallet-node#readme",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "url": "^0.11.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^3.8.0",
+    "@typescript-eslint/parser": "^3.8.0",
+    "eslint": "^7.6.0",
+    "prettier": "^2.0.5",
+    "typescript": "^3.9.7"
+  }
+}
