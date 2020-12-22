@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { DOTWALLET_API } from './';
 import { IAutoPaymentOrder, IOrderResponseData } from './types';
 export const autopayment = (SECRET: string) => {
   return async (orderData: IAutoPaymentOrder, log?: boolean): Promise<IOrderResponseData | Error | undefined> => {

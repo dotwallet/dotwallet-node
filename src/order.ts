@@ -1,10 +1,10 @@
 import axios from 'axios';
-import * as crypto from 'crypto';
-import * as md5 from 'md5';
+// import * as crypto from 'crypto';
+// import * as md5 from 'md5';
 import { IOrderData, IOrderStatusInfo } from './types';
 function getSignature(orderData: any, appSecret: string) {
   let str = '';
-  const secret = md5(appSecret);
+  // const secret = md5(appSecret);
 
   for (let key in orderData) {
     if (key !== 'sign' && key !== 'opreturn') {
@@ -16,12 +16,12 @@ function getSignature(orderData: any, appSecret: string) {
     }
   }
 
-  str += '&secret=' + secret;
+  // str += '&secret=' + secret;
   str = str.toUpperCase();
 
-  const sign = crypto.createHmac('sha256', secret).update(str, 'utf8').digest('hex');
+  // const sign = crypto.createHmac('sha256', secret).update(str, 'utf8').digest('hex');
 
-  return sign;
+  // return sign;
 }
 
 export const handleOrder = (CLIENT_ID: string, SECRET: string) => {

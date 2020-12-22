@@ -3,9 +3,10 @@ import { IUserAccessTokenData, IUserData } from './types';
 import { DOTWALLET_API } from './config';
 
 export const getUserToken = (CLIENT_ID: string, SECRET: string) => {
-  return async (code: string, redirectUri?: string, log?: false) => {
+  return async (code: string, redirectUri: string, log?: false) => {
     try {
-      console.log('==============got code==============\n', code);
+      if (log) console.log('==============got code==============\n', code);
+      if (!code) throw Error('no code supplied. Supply one in the request body {code: <the_code>}');
       const data = {
         client_id: CLIENT_ID,
         client_secret: SECRET,
@@ -13,6 +14,7 @@ export const getUserToken = (CLIENT_ID: string, SECRET: string) => {
         code: code,
         redirect_uri: redirectUri,
       };
+      console.log(data);
       const accessTokenRequest = await axios.post(`${DOTWALLET_API}/oauth2/get_access_token`, data);
       if (log) console.log('==============access token result==============\n', accessTokenRequest.data);
       if (!accessTokenRequest.data.data.access_token || accessTokenRequest.data.code !== 0) throw accessTokenRequest;

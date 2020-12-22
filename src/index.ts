@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+// import { Request, Response, NextFunction } from 'express';
 import { getUserToken, getUserInfo, refreshUserToken } from './userAuth';
 import { handleOrder, getOrderStatus } from './order';
 import {
@@ -22,15 +22,13 @@ class DotWallet {
   private CLIENT_ID: string;
   private SECRET: string;
   private appAccessToken: string | undefined;
-
   start = async () => {
     // functions that us the app token need to be repopulated with the token each time. ones that only use the secrets are static and don't
-    const appAccessTokenData: IAppAccessTokenData | undefined = await getAppAccessToken(this.CLIENT_ID, this.SECRET);
-    this.appAccessToken = appAccessTokenData?.access_token;
+    getAppAccessToken(this.CLIENT_ID, this.SECRET, this, true);
 
     // create a function that updates the functions that use the appAccessToken
     setInterval(() => {});
-    this.refreshAccess = refreshAccess(this.CLIENT_ID);
+    // this.refreshAccess = refreshAccess(this.CLIENT_ID, this);
     this.handleOrder = handleOrder(this.CLIENT_ID, this.SECRET);
     this.getOrderStatus = getOrderStatus(this.CLIENT_ID, this.SECRET);
     this.autopayment = autopayment(this.SECRET);
@@ -57,10 +55,10 @@ class DotWallet {
    * @param { string } refreshToken
    * @returns { object|Error } { refresh_token, expires_in, access_token }
    */
-  refreshAccess: (refreshToken: string) => Promise<IAccessData | Error | undefined>;
+  // refreshAccess: (refreshToken: string) => Promise<IAccessData | Error | undefined>;
 
   /**
-   * @summary sign an order with your deveoper key, and send it to dotwallet servers to get an order_sn
+   * @summary sign an order with your developer key, and send it to dotwallet servers to get an order_sn
    * @param { IOrderData } orderData a valid order as a js object (see the docs or this IorderData type)
    * @returns { string } the order_sn
    */
@@ -102,7 +100,7 @@ class DotWallet {
     this.start();
     this.getUserToken = getUserToken(this.CLIENT_ID, this.SECRET);
     this.getUserInfo = getUserInfo;
-    this.refreshAccess = refreshAccess(this.CLIENT_ID);
+    // this.refreshAccess = refreshAccess(this.CLIENT_ID);
     this.handleOrder = handleOrder(this.CLIENT_ID, this.SECRET);
     this.getOrderStatus = getOrderStatus(this.CLIENT_ID, this.SECRET);
     this.autopayment = autopayment(this.SECRET);

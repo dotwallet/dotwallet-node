@@ -16,23 +16,34 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('src'));
 
+// static pages
+app.get('/', async (req, res) => {
+  res.sendFile(path.join(__dirname + '/views/index.html'));
+});
+// client-side page to receive the code after user confirms login
+app.get('/log-in-redirect', async (req, res) => {
+  res.sendFile(path.join(__dirname + '/views/log-in-redirect.html'));
+});
+app.get('/logged-in', async (req, res) => {
+  res.sendFile(path.join(__dirname + '/views/order-fulfilled.html'));
+});
+app.get('/store-front', async (req, res) => {
+  res.sendFile(path.join(__dirname + '/views/store-front.html'));
+});
 /**
  *
  * ============================AUTHENTICATION============================
  *
  */
 
-app.get('/restricted-page', async (req, res) => {
-  res.sendFile(path.join(__dirname + '/restricted-page.html'));
-});
-
 let accessTokenStorage = ''; // These would go to your database in a real app
 let refreshTokenStorage = '';
 
-app.get('/auth', async (req, res, next) => {
-  const authResponse = await dotwallet.handleAuthResponse(req, res, next, '/restricted-page/', true);
-  refreshTokenStorage = authResponse.accessData.refresh_token;
-  accessTokenStorage = authResponse.accessData.access_token;
+app.post('/auth', async (req, res, next) => {
+  const authTokenData = await dotwallet.getUserToken(req.body.code, req.body.redirect_uri, true);
+  const userAccessToken = authTokenData.access_token;
+  const userData = dotwallet.getUserInfo(userAccessToken, true);
+  res.redirect;
 });
 const refreshAccessToken = (refreshTokenStorage) => {
   dotwallet.refreshAccess(refreshTokenStorage).then((result) => {
@@ -46,13 +57,6 @@ const refreshAccessToken = (refreshTokenStorage) => {
  * ============================PAYMENT============================
  *
  */
-
-app.get('/store-front', async (req, res) => {
-  res.sendFile(path.join(__dirname + '/store-front.html'));
-});
-app.get('/order-fulfilled', async (req, res) => {
-  res.sendFile(path.join(__dirname + '/order-fulfilled.html'));
-});
 
 app.post('/create-order', async (req, res) => {
   const merchant_order_sn = req.body.merchant_order_sn;
