@@ -5,7 +5,6 @@ export const getAppAccessToken = async (
   CLIENT_ID: string,
   SECRET: string,
   DotWalletClass: any,
-  log: boolean,
 ): Promise<IAppAccessTokenData | undefined> => {
   try {
     const data = {
@@ -15,7 +14,7 @@ export const getAppAccessToken = async (
     };
 
     const accessTokenRequest = await axios.post('https://api.ddpurse.com/v1/oauth2/get_access_token', data);
-    if (log) console.log('==============access token result==============\n', accessTokenRequest.data);
+    //  console.log('==============access token result==============\n', accessTokenRequest.data);
     if (!accessTokenRequest.data.data.access_token || accessTokenRequest.data.code !== 0) throw accessTokenRequest;
     else {
       DotWalletClass.appAccessToken = accessTokenRequest.data.data.access_token;

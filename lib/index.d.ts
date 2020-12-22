@@ -3,19 +3,25 @@ declare class DotWallet {
     private CLIENT_ID;
     private SECRET;
     private appAccessToken;
-    start: () => Promise<void>;
-    /** @param redirectWithQueries If you'd like to have express send the response to redirect to a url, carrying the user data queries with it, than include a redirect URL string here
-     * @param log whether to log events
-     * @example app.get('/auth', Dotwallet.handleAuthResponse('/frontend-landing-page', true)); app.get('/auth', dotwallet.handleAuthResponse().then(result=>{const userData = result.userData; const accessToken = result.accessData.access_token;}));
-     * @returns {object} { userData: {user_open_id, ...}, accessData:{ refresh_token, expires_in, access_token }}
-     */
-    getUserToken: (code: string, redirectUri?: string | undefined, log?: false | undefined) => Promise<IUserAccessTokenData | undefined>;
-    getUserInfo: (userAccessToken: string, log?: false | undefined) => Promise<IUserData | undefined>;
+    refreshAppAuth: () => Promise<void>;
+    populateStaticMethods: () => void;
+    populateTokenMethods: () => void;
+    resetAppToken: (CLIENT_ID: string, SECRET: string, that: this) => Promise<void>;
+    init: (CLIENT_ID: string, SECRET: string) => Promise<void>;
     /**
-     * @summary Use your refresh token to get back an access token and a new refresh token
-     * @param { string } refreshToken
-     * @returns { object|Error } { refresh_token, expires_in, access_token }
+     * @param code the code from the login challenge at https://api.ddpurse.com/v1/oauth2/authorize?client_id=...
+     * @param redirectUri Must match provided redirect uri in the login challenge
+     * @param log whether to log events
+     * @example
+    app.post('/auth', async (req, res, next) => {
+      const authTokenData = await dotwallet.getUserToken(req.body.code, req.body.redirect_uri, true);
+      res.json({ ...authTokenData });
+    });
+     * @returns {object} { access_token: 'JWT access token', expires_in: number, token_type: 'Bearer', refresh_token: string, scope: string
+  }
      */
+    getUserToken: (code: string, redirectUri: string, log?: false | undefined) => Promise<IUserAccessTokenData | undefined>;
+    getUserInfo: (userAccessToken: string, log?: false | undefined) => Promise<IUserData | undefined>;
     /**
      * @summary sign an order with your developer key, and send it to dotwallet servers to get an order_sn
      * @param { IOrderData } orderData a valid order as a js object (see the docs or this IorderData type)
@@ -36,7 +42,5 @@ declare class DotWallet {
      * @param {string|object} data JSON.stringify-able data if default, or rawhex string if rawhex
      */
     saveData: (data: any, dataType?: dataType, log?: boolean | undefined) => Promise<ISaveDataResponse | Error | undefined>;
-    constructor(appId: string, secret: string);
 }
-declare const caller: (appId: string, secret: string) => DotWallet;
-export = caller;
+export = DotWallet;

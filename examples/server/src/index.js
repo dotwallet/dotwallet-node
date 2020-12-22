@@ -1,17 +1,20 @@
 const express = require('express');
 const path = require('path');
 const dotenv = require('dotenv');
+dotenv.config({ path: './.env' });
+
 const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 var ip = require('ip');
-
-dotenv.config({ path: './.env' });
+const url = require('url');
 const PORT = process.env.PORT || 3000;
+const appUrl = 'http://' + ip.address() + ':' + PORT;
 const YOUR_CLIENT_SECRET = process.env.CLIENT_SECRET;
 const YOUR_CLIENT_ID = process.env.CLIENT_ID;
 const DotWallet = require('../../../lib/index.js');
-const dotwallet = DotWallet(YOUR_CLIENT_ID, YOUR_CLIENT_SECRET);
+const dotwallet = new DotWallet();
+dotwallet.init(YOUR_CLIENT_ID, YOUR_CLIENT_SECRET);
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('src'));
@@ -25,7 +28,7 @@ app.get('/log-in-redirect', async (req, res) => {
   res.sendFile(path.join(__dirname + '/views/log-in-redirect.html'));
 });
 app.get('/logged-in', async (req, res) => {
-  res.sendFile(path.join(__dirname + '/views/order-fulfilled.html'));
+  res.sendFile(path.join(__dirname + '/views/logged-in.html'));
 });
 app.get('/store-front', async (req, res) => {
   res.sendFile(path.join(__dirname + '/views/store-front.html'));
@@ -36,21 +39,12 @@ app.get('/store-front', async (req, res) => {
  *
  */
 
-let accessTokenStorage = ''; // These would go to your database in a real app
-let refreshTokenStorage = '';
-
 app.post('/auth', async (req, res, next) => {
   const authTokenData = await dotwallet.getUserToken(req.body.code, req.body.redirect_uri, true);
   const userAccessToken = authTokenData.access_token;
   const userData = dotwallet.getUserInfo(userAccessToken, true);
-  res.redirect;
+  res.json({ ...userData, ...authTokenData });
 });
-const refreshAccessToken = (refreshTokenStorage) => {
-  dotwallet.refreshAccess(refreshTokenStorage).then((result) => {
-    refreshTokenStorage = result.refresh_token;
-    accessTokenStorage = result.access_token;
-  });
-};
 
 /**
  *
@@ -128,8 +122,6 @@ app.post('/save-data', async (req, res) => {
 
 app.listen(PORT, () =>
   console.log(
-    `DotWallet example app listening at ${
-      process.env.NODE_ENV === 'production' ? 'production host' : ip.address() + ':' + PORT
-    }`,
+    `DotWallet example app listening at ${process.env.NODE_ENV === 'production' ? 'production host' : appUrl}`,
   ),
 );
