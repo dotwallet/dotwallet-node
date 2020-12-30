@@ -29,7 +29,7 @@
     <script src="./config.js"></script>
 
     <script>
-      const scope = encodeURIComponent('user.info autopay.bsv autopay.btc autopay.eth');
+      const scope = encodeURIComponent('user.info autopay.bsv');
       const redirectURI = encodeURIComponent(`${APP_URL}/log-in-redirect`);
       const loginState = uuidv4();
       localStorage.setItem('loginState', loginState);

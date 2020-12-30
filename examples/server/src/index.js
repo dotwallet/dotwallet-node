@@ -14,7 +14,7 @@ const YOUR_CLIENT_SECRET = process.env.CLIENT_SECRET;
 const YOUR_CLIENT_ID = process.env.CLIENT_ID;
 const DotWallet = require('../../../lib/index.js');
 const dotwallet = new DotWallet();
-dotwallet.init(YOUR_CLIENT_ID, YOUR_CLIENT_SECRET);
+dotwallet.init(YOUR_CLIENT_ID, YOUR_CLIENT_SECRET, true);
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('src'));
@@ -42,7 +42,8 @@ app.get('/store-front', async (req, res) => {
 app.post('/auth', async (req, res, next) => {
   const authTokenData = await dotwallet.getUserToken(req.body.code, req.body.redirect_uri, true);
   const userAccessToken = authTokenData.access_token;
-  const userData = dotwallet.getUserInfo(userAccessToken, true);
+  console.log('userAccessToken', userAccessToken);
+  const userData = await dotwallet.getUserInfo(userAccessToken, true);
   res.json({ ...userData, ...authTokenData });
 });
 
@@ -53,18 +54,19 @@ app.post('/auth', async (req, res, next) => {
  */
 
 app.post('/create-order', async (req, res) => {
-  const merchant_order_sn = req.body.merchant_order_sn;
-  const order_sn = await dotwallet.handleOrder(req.body, true);
+  const order = { ...req.body };
+  const orderID = await dotwallet.getOrderID(req.body, true);
   setTimeout(async () => {
-    const orderStatus = await dotwallet.getOrderStatus(merchant_order_sn, true);
-    console.log('==============orderStatus==============\n', orderStatus);
+    const orderStatus = await dotwallet.getOrderStatus(orderID, true);
+    // console.log('==============orderStatus==============\n', orderStatus);
   }, 1000 * 60);
-  res.json({ order_sn });
+  res.json({ order_id: orderID });
 });
 
-app.get('/payment-result', (req, res) => {
+app.post('/payment-result', (req, res) => {
   // the response from 'notice_uri' will be in the request queries
-  console.log('==============payment-result req==============\n', req.query);
+  console.log('==============payment-result req==============\n', req.body);
+  res.json({ code: 1 });
 });
 
 /**

@@ -29,12 +29,8 @@
           Bananas
           <img class="mr-auto ml-2" src="./assets/bananas.png" alt="bananas" width="50px" />
           546 satoshis
-          <button class="btn btn-secondary btn-sm mx-2" id="banana-button" type="button">
-            single pay
-          </button>
-          <button class="btn btn-secondary btn-sm" id="autopay-button" type="button">
-            auto pay
-          </button>
+          <button class="btn btn-secondary btn-sm mx-2" id="banana-button" type="button">single pay</button>
+          <button class="btn btn-secondary btn-sm" id="autopay-button" type="button">auto pay</button>
         </li>
         <li class="list-group-item mb-2 d-flex">
           More Bananas
@@ -56,12 +52,7 @@
         <button class="btn btn-outline-primary btn-lg mt-5" type="button" id="save-data">
           Record today's prices on the blockchain
         </button>
-        <button
-          class="btn btn-outline-primary btn-lg mt-5"
-          style="display: none"
-          type="button"
-          id="check-data"
-        >
+        <button class="btn btn-outline-primary btn-lg mt-5" style="display: none" type="button" id="check-data">
           Check data saved on the blockchain
         </button>
         <p id="check-data-display"></p>
@@ -75,14 +66,14 @@
       // Payments
       document.getElementById('store-link').href = window.location.origin + '/store-front';
       // basic payment order info
-      const orderData = {
+      const order = {
         out_order_id: uuidv4(),
         coin_type: 'BSV',
         to: [
           {
             type: 'address',
             content: '1L3z6DzHpfr7pkkZmKfVNMjwY1984D5YRv',
-            amount: 5460000000,
+            amount: 546,
           },
         ],
         product: {
@@ -98,26 +89,25 @@
       document.getElementById('banana-button').addEventListener('click', async () => {
         document.getElementById('order-status').innerText = '';
 
-        const orderSnResponse = await fetch(
+        const orderIDResponse = await fetch(
           APP_URL + '/create-order', // replace with your IP
           {
             method: 'POST',
             body: JSON.stringify({
-              ...orderData,
+              ...order,
               redirect_uri: window.location.href, // replace with your IP
-              expires: 0,
             }),
             headers: {
               'Content-type': 'application/json; charset=UTF-8',
             },
-          }
+          },
         );
-        const orderSnData = await orderSnResponse.json();
-        console.log('orderSnData', orderSnData);
+        const orderIDData = await orderIDResponse.json();
+        console.log('orderIDData', orderIDData);
 
-        if (orderSnData.data) {
-          window.location.href = `${DOTWALLET_API}/v1/transact/order/apply_payment?order_id=${orderSnData.data}`;
-        } else document.getElementById('order-status').innerText = 'error: ' + orderSnData.error;
+        if (orderIDData.order_id) {
+          window.location.href = `${DOTWALLET_API}/transact/order/apply_payment?order_id=${orderIDData.order_id}`;
+        } else document.getElementById('order-status').innerText = 'error: ' + orderIDData;
       });
 
       // autopay
@@ -126,20 +116,16 @@
           APP_URL + '/create-autopayment', // replace with your IP
           {
             method: 'POST',
-            body: JSON.stringify({ ...orderData, user_id: localStorage.getItem('id') }),
+            body: JSON.stringify({ ...order, user_id: localStorage.getItem('id') }),
             headers: {
               'Content-type': 'application/json; charset=UTF-8',
             },
-          }
+          },
         );
         const autoPaymentResponseData = await autoPaymentResponse.json();
         console.log(autoPaymentResponseData);
-        if (autoPaymentResponseData.txid)
-          document.getElementById('order-status').innerText = 'paid!';
-        else if (
-          autoPaymentResponseData.error &&
-          autoPaymentResponseData.error === 'balance too low'
-        )
+        if (autoPaymentResponseData.txid) document.getElementById('order-status').innerText = 'paid!';
+        else if (autoPaymentResponseData.error && autoPaymentResponseData.error === 'balance too low')
           window.location.href = `${DOTWALLET_CLIENT}/wallet/open/transfer?redirect_url=${window.location.href}`;
         else document.getElementById('order-status').innerText = 'payment failed';
       });
@@ -160,15 +146,13 @@
             headers: {
               'Content-type': 'application/json; charset=UTF-8',
             },
-          }
+          },
         );
         const responseData = await response.json();
         console.log('saveDataResponseData', responseData);
         if (responseData.txid) {
           document.getElementById('order-status').innerText = `Saved!`;
-          document.getElementById(
-            'check-data-link'
-          ).href = `https://satoshi.io/tx/${responseData.txid}`;
+          document.getElementById('check-data-link').href = `https://satoshi.io/tx/${responseData.txid}`;
           document.getElementById('check-data-link').innerText = 'Check transaction';
           document.getElementById('check-data').style = 'display: initial';
           document.getElementById('check-data').addEventListener('click', () => {

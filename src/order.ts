@@ -1,46 +1,46 @@
-import axios from 'axios';
-// import * as crypto from 'crypto';
-// import * as md5 from 'md5';
-import { IOrderData, IOrderStatusInfo } from './types';
-function getSignature(orderData: any, appSecret: string) {
-  let str = '';
-  // const secret = md5(appSecret);
+import axios, { AxiosRequestConfig } from 'axios';
+import { IPaymentOrder, IPaymentQuery } from './types';
+import { DOTWALLET_API } from './config';
+import DotWallet from './index';
+import { getAppAccessToken } from './appAuth';
 
-  for (let key in orderData) {
-    if (key !== 'sign' && key !== 'opreturn') {
-      if (str) {
-        str += '&' + key + '=' + orderData[key];
-      } else {
-        str = key + '=' + orderData[key];
-      }
+async function createOrder(orderData: IPaymentOrder, appAccessToken: string, log: boolean = false) {
+  try {
+    console.log('==============orderData==============\n', orderData);
+    console.log('==============appAccessToken==============\n', appAccessToken);
+
+    const options: AxiosRequestConfig = {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${appAccessToken}`,
+      },
+      method: 'POST',
+      data: { ...orderData },
+    };
+    const orderIDResponse = await axios(`${DOTWALLET_API}/transact/order/create`, options);
+    const orderIDData = orderIDResponse.data;
+    if (log) console.log('==============orderIDData==============', orderIDData);
+    if (orderIDData.code === 75000) return 'expired token';
+    else if (orderIDData.data && orderIDData.code == 0 && orderIDData.data) {
+      return orderIDData.data;
+    } else {
+      return { error: orderIDData.data ? orderIDData.data : orderIDData };
     }
+  } catch (err) {
+    if (log) console.log('==============err==============\n', err);
   }
-
-  // str += '&secret=' + secret;
-  str = str.toUpperCase();
-
-  // const sign = crypto.createHmac('sha256', secret).update(str, 'utf8').digest('hex');
-
-  // return sign;
 }
 
-export const handleOrder = (CLIENT_ID: string, SECRET: string) => {
-  return async (orderData: IOrderData, log?: boolean): Promise<string | Error | undefined> => {
+export const getOrderID = ($this: DotWallet) => {
+  return async (order: IPaymentOrder, log: boolean = false): Promise<string | Error | undefined> => {
     try {
-      if (orderData.app_id !== CLIENT_ID) throw 'order app_id does not match server app_id';
-      if (log) console.log('==============orderData==============\n', orderData);
-      const signedOrder = {
-        ...orderData,
-        sign: getSignature(orderData, SECRET),
-      };
-      if (log) console.log('==============posting signed order==============\n', signedOrder);
-
-      const orderSnResponse = await axios.post('https://www.ddpurse.com/platform/openapi/create_order', signedOrder);
-      const orderSnData = orderSnResponse.data;
-      if (orderSnData.data && orderSnData.data.order_sn && orderSnData.code === 0) {
-        if (log) console.log('==============orderSnData==============', orderSnData);
-        return orderSnData.data.order_sn;
-      } else throw orderSnResponse;
+      let orderIdResult = await createOrder(order, $this.appAccessToken, log);
+      if (orderIdResult === 'expired token') {
+        await getAppAccessToken($this, log);
+        orderIdResult = await createOrder(order, $this.appAccessToken, log);
+      }
+      if (log) console.log('==============orderIdResult==============\n', orderIdResult);
+      return orderIdResult;
     } catch (err) {
       if (log) console.log('==============err==============\n', err);
       return err;
@@ -48,20 +48,37 @@ export const handleOrder = (CLIENT_ID: string, SECRET: string) => {
   };
 };
 
-export const getOrderStatus = (CLIENT_ID: string, SECRET: string, log?: boolean) => {
-  return async (merchant_order_sn: string): Promise<IOrderStatusInfo | Error | undefined> => {
+const orderStatus = async (orderID: string, appAccessToken: string, log: boolean = false) => {
+  try {
+    const options: AxiosRequestConfig = {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${appAccessToken}`,
+      },
+      method: 'POST',
+      data: { order_id: orderID },
+    };
+    const orderStatusResponse = await axios(`${DOTWALLET_API}/transact/order/get_order`, options);
+    if (!orderStatusResponse.data || orderStatusResponse.data.code !== 0) throw orderStatusResponse;
+    if (orderStatusResponse.data.code === 75000) return 'expired token';
+    const orderStatusData: IPaymentQuery = orderStatusResponse.data;
+    if (log) console.log('==============order Status result==============\n', orderStatusData);
+    return orderStatusData;
+  } catch (err) {
+    if (log) console.log('==============err==============\n', err);
+  }
+};
+
+export const getOrderStatus = ($this: DotWallet) => {
+  return async (orderID: string, log: boolean = false) => {
     try {
-      const orderStatusResponse = await axios.post('https://www.ddpurse.com/platform/openapi/search_order', {
-        app_id: CLIENT_ID,
-        secret: SECRET,
-        merchant_order_sn: merchant_order_sn,
-      });
-      if (!orderStatusResponse.data) throw orderStatusResponse;
-      const orderStatusData = orderStatusResponse.data;
-      if (log) console.log('==============orderStatus==============\n', orderStatusData);
-      if (!orderStatusData.data || orderStatusData.code !== 0) throw orderStatusData;
-      const returnData: IOrderStatusInfo = orderStatusData.data;
-      return returnData;
+      let orderStatusResult = await orderStatus(orderID, $this.appAccessToken, log);
+      if (orderStatusResult === 'expired token') {
+        await getAppAccessToken($this, log);
+        orderStatusResult = await orderStatus(orderID, $this.appAccessToken, log);
+      }
+      if (log) console.log('==============orderStatusResult==============\n', orderStatusResult);
+      return orderStatusResult;
     } catch (err) {
       if (log) console.log('==============err==============\n', err);
       return err;
