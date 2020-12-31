@@ -31,11 +31,11 @@
 
     <script>
       const userName = localStorage.getItem('nickname');
-      const userId = localStorage.getItem('id');
+      const userID = localStorage.getItem('id');
       const userPic = localStorage.getItem('avatar');
       // const urlParams = new URLSearchParams(window.location.search);
       // const userName = urlParams.get('name');
-      // const userId = urlParams.get('user_id');
+      // const userID = urlParams.get('user_id');
       userName
         ? (document.getElementById('user-name').innerHTML = 'Hello ' + userName)
         : (document.getElementById('user-name').innerHTML = 'User not found');

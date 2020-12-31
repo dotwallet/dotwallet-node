@@ -3,7 +3,7 @@ import { getUserToken, getUserInfo, refreshUserToken } from './userAuth';
 import { getOrderID, getOrderStatus } from './order';
 import { IUserData, IUserAccessTokenData, IPaymentOrder, IAutoPayOrder } from './types';
 import { autoPay } from './autopay';
-// import { saveData, getHostedAccount, hostedAccountBalance } from './saveData';
+import { saveData, getSavedData } from './saveData';
 import { requestAppAccessToken } from './appAuth';
 class DotWallet {
   CLIENT_ID: string = '';
@@ -51,7 +51,7 @@ class DotWallet {
   /**
    * @param code the code from the login challenge at https://api.ddpurse.com/v1/oauth2/authorize?client_id=...
    * @param redirectUri Must match provided redirect uri in the login challenge
-   * @param log whether to log events
+   * @param {boolean} log whether to console.log() internal events
    * @example 
   app.post('/auth', async (req, res, next) => {
     const authTokenData = await dotwallet.getUserToken(req.body.code, req.body.redirect_uri, true);
@@ -66,6 +66,7 @@ class DotWallet {
   /**
    * @summary sign an order with your developer key, and send it to dotwallet servers to get an order_sn
    * @param { IOrderData } orderData a valid order as a js object (see the docs or this IorderData type)
+   * @param {boolean} log whether to console.log() internal events
    * @returns { string } the order_sn
    */
   getOrderID = getOrderID(this);
@@ -75,19 +76,21 @@ class DotWallet {
   /**
    * @summary Send out a payment on behalf of a wallet that has authorized auto-payments
    * @param { IAutoPayOrder } orderData a valid order as a js object (see the docs or this IAutoPayOrder type)
+   * @param {boolean} log whether to console.log() internal events
    * @returns { IAutoPayResponse | { error: 'balance too low'} } The order response. If balance too low, returns { error: 'balance too low'}
    */
   autoPay = autoPay(this);
 
-  // /**
-  //  * @param {dataType} dataType 0 for string and 1 for rawhex. If you select 0 (the default) we will JSON.stringify() the data to be saved on chain
-  //  * @param {string|object} data JSON.stringify-able data if default, or rawhex string if rawhex
-  //  */
-  // saveData: (
-  //   data: any,
-  //   dataType?: dataType,
-  //   log?: boolean | undefined,
-  // ) => Promise<ISaveDataResponse | Error | undefined> = saveData(this.CLIENT_ID, this.SECRET);
+  /**
+   * @summary Save data on chain using an automatic payment. **NOTE: Requires wallet has authorized automatic payments and has sufficient balance
+   * @param {string|object} data JSON.stringify-able data. Will be converted to hex and saved on chain with the prefix `006a`
+   * @param {string} userID the user_id of the wallet providing the funds for the transaction
+   * @param {object} options optional fields from an automatic payment order object
+   * @param {boolean} log whether to console.log() internal events
+   */
+  saveData = saveData(this);
+
+  getSavedData = getSavedData(this);
 }
 
 export = DotWallet;

@@ -91,28 +91,26 @@ const savedDataTxns = []; // In real app could store in DB. Save a list of txns 
 
 app.post('/save-data', async (req, res) => {
   try {
-    const data = req.body;
-    // check if recieve address is dev's own
-    console.log('==============data==============\n', data);
-
-    const getHostedData = await dotwallet.getHostedAccount('BSV', true);
-    console.log('==============getHostedData==============', getHostedData);
-
-    const getBalanceData = await dotwallet.hostedAccountBalance('BSV', true);
-    console.log('==============getBalanceData==============', getBalanceData);
-
-    if (getBalanceData.confirm + getBalanceData.unconfirm < 700) throw 'developer wallet balance too low';
-
-    const saveDataData = await dotwallet.saveData(data, 0, true);
-    console.log('==============saveDataData==============', saveDataData);
+    const data = req.body.saveData;
+    const userID = req.body.userID;
+    const saveData = await dotwallet.saveData(data, userID, undefined, true);
     savedDataTxns.push({
-      ...saveDataData.data,
+      ...saveData,
       timestamp: new Date(),
       tag: 'banana-price',
     }); //in a real app this would go to DB
-    res.json(saveDataData.data);
+    res.json(saveData);
   } catch (err) {
-    console.log(err.msg, err.data, err.message, err.response);
+    console.log('==============err==============\n', err);
+    res.json(err);
+  }
+});
+
+app.post('/get-tx-data', async (req, res) => {
+  try {
+    const savedData = await dotwallet.getSavedData(req.body.txid, true);
+    res.json(savedData);
+  } catch (err) {
     console.log('==============err==============\n', err);
     res.json(err);
   }

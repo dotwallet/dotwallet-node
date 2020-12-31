@@ -1,88 +1,117 @@
-// import axios, { AxiosRequestConfig } from 'axios';
-// import { dataType, IGetHostedResponse, IGetBalanceResponse, ISaveDataResponse } from './types';
+import axios, { AxiosRequestConfig } from 'axios';
+import { IAutoPayResponse, IAutoPayOrder, ITXInquiry } from './types';
+import { v4 as uuid } from 'uuid';
+import DotWallet from './index';
+import { DOTWALLET_API } from './config';
+import { requestAppAccessToken } from './appAuth';
 
-// export const saveData = (CLIENT_ID: string, SECRET: string) => {
-//   return async (data: any, dataType: dataType = 0, log?: boolean): Promise<ISaveDataResponse | Error | undefined> => {
-//     try {
-//       const saveDataOptions: AxiosRequestConfig = {
-//         headers: {
-//           'Content-Type': 'application/json',
-//           appid: CLIENT_ID,
-//           appsecret: SECRET,
-//         },
-//         method: 'POST',
-//         data: {
-//           coin_type: 'BSV',
-//           data: dataType === 0 ? JSON.stringify(data) : data,
-//           data_type: dataType,
-//         },
-//       };
-//       const res = await axios('https://www.ddpurse.com/platform/openapi/v2/push_chain_data', saveDataOptions);
-//       const saveDataResponse = res.data;
-//       if (log) console.log('==============saveDataResponse==============', saveDataResponse);
-//       if (saveDataResponse.code !== 0) throw saveDataResponse;
-//       const returnData: ISaveDataResponse = saveDataResponse.data;
-//       return returnData;
-//     } catch (err) {
-//       if (log) console.log('==============err==============\n', err);
-//       return err;
-//     }
-//   };
-// };
+export const saveData = ($this: DotWallet) => {
+  return async (
+    data: any,
+    userID: string,
+    options?: {
+      out_order_id?: string;
+      product?: {
+        id?: string;
+        name?: string;
+        detail?: string;
+      };
+      subject?: string;
+      notify_url?: string;
+      redirect_uri?: string;
+    },
+    log: boolean = false,
+  ) => {
+    try {
+      const hexEncoded = Buffer.from(JSON.stringify(data), 'utf8').toString('hex');
+      if (log) console.log('==============received: data, userID, options==============\n', data, userID, options);
+      const orderData: IAutoPayOrder = {
+        user_id: userID,
+        out_order_id: options?.out_order_id || uuid(),
+        coin_type: 'BSV',
+        to: [
+          {
+            type: 'script',
+            content: `006a${hexEncoded}`,
+            amount: 0,
+          },
+        ],
+        product: {
+          id: options?.product?.id || uuid(),
+          name: options?.product?.name || new Date().getDate().toString(),
+          detail: options?.product?.detail,
+        },
+        subject: options?.subject,
+        notify_url: options?.notify_url,
+        redirect_uri: options?.notify_url,
+      };
+      const requestOptions: AxiosRequestConfig = {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${$this.getAppAccessToken()}`,
+        },
+        method: 'POST',
+        data: orderData,
+      };
+      const callApi = () => axios(`${DOTWALLET_API}/transact/order/autopay`, requestOptions);
+      let orderResponse = await callApi();
+      let orderResponseData = orderResponse.data;
+      if (log) console.log('==============orderResponseData==============', orderResponseData);
+      if (orderResponseData.code === 75000) {
+        await requestAppAccessToken($this, log);
+        orderResponse = await callApi();
+        orderResponseData = orderResponse.data;
+      }
+      if (
+        orderResponseData.code === 10180007 || // autopay wallet balance too low
+        orderResponseData.code === 10180029 // autopay transaction limit too low
+      ) {
+        return { error: 'balance too low' };
+      } else if (orderResponseData.code !== 0) throw orderResponseData;
+      else return orderResponseData.data as IAutoPayResponse;
+    } catch (error) {
+      if (log) console.log('==============save data error==============\n', error);
+      return { error };
+    }
+  };
+};
 
-// export const getHostedAccount = (CLIENT_ID: string, SECRET: string) => {
-//   return async (coinType: string = 'BSV', log?: boolean): Promise<IGetHostedResponse | Error | undefined> => {
-//     try {
-//       const getHostedOptions: AxiosRequestConfig = {
-//         headers: {
-//           'Content-Type': 'application/json',
-//           appid: CLIENT_ID,
-//           appsecret: SECRET,
-//         },
-//         method: 'POST',
-//         data: {
-//           coin_type: coinType,
-//         },
-//       };
-//       const res = await axios('https://www.ddpurse.com/platform/openapi/v2/get_hosted_account', getHostedOptions);
-//       const getHostedData = res.data;
-//       if (log) console.log('==============getHostedData==============', getHostedData);
-//       if (getHostedData.code !== 0 || !getHostedData.data.address) throw getHostedData;
-//       const returnData: IGetHostedResponse = getHostedData.data;
-//       return returnData;
-//     } catch (err) {
-//       if (log) console.log('==============err==============\n', err);
-//       return err;
-//     }
-//   };
-// };
-
-// export const hostedAccountBalance = (CLIENT_ID: string, SECRET: string) => {
-//   return async (coinType: string = 'BSV', log?: boolean): Promise<IGetBalanceResponse | Error | undefined> => {
-//     try {
-//       const getBalanceOptions: AxiosRequestConfig = {
-//         headers: {
-//           'Content-Type': 'application/json',
-//           appid: CLIENT_ID,
-//           appsecret: SECRET,
-//         },
-//         method: 'POST',
-//         data: {
-//           coin_type: coinType,
-//         },
-//       };
-//       const getBalance = await axios(
-//         'https://www.ddpurse.com/platform/openapi/v2/get_hosted_account_balance',
-//         getBalanceOptions,
-//       );
-//       const getBalanceData = getBalance.data;
-//       if (log) console.log('==============getBalanceData==============', getBalanceData);
-//       if (getBalanceData.code !== 0 || !getBalanceData.data) throw getBalanceData;
-//       const returnData: IGetBalanceResponse = getBalanceData.data;
-//       return returnData;
-//     } catch (err) {
-//       if (log) console.log('==============err==============\n', err);
-//       return err;
-//     }
-//   };
-// };
+export const getSavedData = ($this: DotWallet) => {
+  return async (txid: string, log: boolean = false) => {
+    try {
+      if (log) console.log('==============txid==============\n', txid);
+      const options: AxiosRequestConfig = {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${$this.getAppAccessToken()}`,
+        },
+        method: 'POST',
+        data: JSON.stringify({ transaction_hash: txid }),
+      };
+      const callApi = () => axios(`${DOTWALLET_API}/bsvchain/get_transaction`, options);
+      let response = await callApi();
+      let responseData = response.data;
+      if (log) console.log('==============responseData==============', responseData);
+      if (responseData.code === 75000) {
+        await requestAppAccessToken($this, log);
+        response = await callApi();
+        responseData = response.data;
+      }
+      let data: any;
+      const txInquiry: any = responseData.data;
+      txInquiry.vouts.forEach((vout: any) => {
+        if (vout.script_hex.startsWith('006a')) {
+          const hexDecoded = Buffer.from(
+            vout.script_hex.slice(4), // slice off the '006a'
+            'hex',
+          ).toString('utf8');
+          data = JSON.parse(hexDecoded);
+        }
+      });
+      return data;
+    } catch (error) {
+      if (log) console.log('==============check tx err==============\n', error);
+      return { error };
+    }
+  };
+};

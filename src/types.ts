@@ -40,10 +40,9 @@ export interface IOrder {
   subject?: string;
   notify_url?: string;
   redirect_uri?: string;
-  expires?: number;
 }
 export interface IPaymentOrder extends IOrder {
-  redirect_uri?: string;
+  redirect_uri: string;
   expires?: number;
 }
 export interface IAutoPayOrder extends IOrder {
@@ -94,4 +93,20 @@ export interface IAutoPayResponse {
   amount: number;
   fee: number;
   txid: string;
+}
+
+export interface IVinVout {
+  index: number;
+  script: string;
+  value: number;
+}
+
+export interface ITXInquiry {
+  txid: string;
+  vins: IVinVout[];
+  vouts: IVinVout[];
+  height: number;
+  size: number;
+  timestamp: number;
+  confirmation: number;
 }
