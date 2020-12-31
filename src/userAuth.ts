@@ -3,7 +3,7 @@ import { IUserAccessTokenData, IUserData } from './types';
 import { DOTWALLET_API } from './config';
 import DotWallet from './index';
 export const getUserToken = ($this: DotWallet) => {
-  return async (code: string, redirectUri: string, log?: false) => {
+  return async (code: string, redirectUri: string, log: boolean = false) => {
     try {
       if (log) console.log('==============got code==============\n', code);
       if (!code) throw Error('no code supplied. Supply one in the request body {code: <the_code>}');

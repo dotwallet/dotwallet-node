@@ -5,7 +5,7 @@ import { DOTWALLET_API } from './config';
 import { requestAppAccessToken } from './appAuth';
 
 export const autoPay = ($this: DotWallet) => {
-  return async (order: IAutoPayOrder, log?: boolean) => {
+  return async (order: IAutoPayOrder, log: boolean = false) => {
     try {
       // console.log('==============orderData==============\n', req.body);
       const options: AxiosRequestConfig = {
@@ -35,7 +35,7 @@ export const autoPay = ($this: DotWallet) => {
       else return orderResponseData.data as IAutoPayResponse;
     } catch (err) {
       console.log('==============err==============\n', err);
-      return { error: err as Error };
+      return { error: err };
     }
   };
 };
