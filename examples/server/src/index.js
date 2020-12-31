@@ -1,45 +1,51 @@
 const express = require('express');
 const path = require('path');
 const dotenv = require('dotenv');
+dotenv.config({ path: './.env' });
+
 const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 var ip = require('ip');
-
-dotenv.config({ path: './.env' });
+const url = require('url');
 const PORT = process.env.PORT || 3000;
+const appUrl = 'http://' + ip.address() + ':' + PORT;
 const YOUR_CLIENT_SECRET = process.env.CLIENT_SECRET;
 const YOUR_CLIENT_ID = process.env.CLIENT_ID;
 const DotWallet = require('../../../lib/index.js');
-const dotwallet = DotWallet(YOUR_CLIENT_ID, YOUR_CLIENT_SECRET);
+const dotwallet = new DotWallet();
+dotwallet.init(YOUR_CLIENT_ID, YOUR_CLIENT_SECRET, true);
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('src'));
 
+// static pages
+app.get('/', async (req, res) => {
+  res.sendFile(path.join(__dirname + '/views/index.html'));
+});
+// client-side page to receive the code after user confirms login
+app.get('/log-in-redirect', async (req, res) => {
+  res.sendFile(path.join(__dirname + '/views/log-in-redirect.html'));
+});
+app.get('/logged-in', async (req, res) => {
+  res.sendFile(path.join(__dirname + '/views/logged-in.html'));
+});
+app.get('/store-front', async (req, res) => {
+  res.sendFile(path.join(__dirname + '/views/store-front.html'));
+});
 /**
  *
  * ============================AUTHENTICATION============================
  *
  */
 
-app.get('/restricted-page', async (req, res) => {
-  res.sendFile(path.join(__dirname + '/restricted-page.html'));
+app.post('/auth', async (req, res, next) => {
+  const authTokenData = await dotwallet.getUserToken(req.body.code, req.body.redirect_uri, true);
+  const userAccessToken = authTokenData.access_token;
+  console.log('userAccessToken', userAccessToken);
+  const userData = await dotwallet.getUserInfo(userAccessToken, true);
+  res.json({ ...userData, ...authTokenData });
 });
-
-let accessTokenStorage = ''; // These would go to your database in a real app
-let refreshTokenStorage = '';
-
-app.get('/auth', async (req, res, next) => {
-  const authResponse = await dotwallet.handleAuthResponse(req, res, next, '/restricted-page/', true);
-  refreshTokenStorage = authResponse.accessData.refresh_token;
-  accessTokenStorage = authResponse.accessData.access_token;
-});
-const refreshAccessToken = (refreshTokenStorage) => {
-  dotwallet.refreshAccess(refreshTokenStorage).then((result) => {
-    refreshTokenStorage = result.refresh_token;
-    accessTokenStorage = result.access_token;
-  });
-};
 
 /**
  *
@@ -47,26 +53,20 @@ const refreshAccessToken = (refreshTokenStorage) => {
  *
  */
 
-app.get('/store-front', async (req, res) => {
-  res.sendFile(path.join(__dirname + '/store-front.html'));
-});
-app.get('/order-fulfilled', async (req, res) => {
-  res.sendFile(path.join(__dirname + '/order-fulfilled.html'));
-});
-
 app.post('/create-order', async (req, res) => {
-  const merchant_order_sn = req.body.merchant_order_sn;
-  const order_sn = await dotwallet.handleOrder(req.body, true);
+  const order = { ...req.body };
+  const orderID = await dotwallet.getOrderID(req.body, true);
   setTimeout(async () => {
-    const orderStatus = await dotwallet.getOrderStatus(merchant_order_sn, true);
-    console.log('==============orderStatus==============\n', orderStatus);
+    const orderStatus = await dotwallet.getOrderStatus(orderID, true);
+    // console.log('==============orderStatus==============\n', orderStatus);
   }, 1000 * 60);
-  res.json({ order_sn });
+  res.json({ order_id: orderID });
 });
 
-app.get('/payment-result', (req, res) => {
+app.post('/payment-result', (req, res) => {
   // the response from 'notice_uri' will be in the request queries
-  console.log('==============payment-result req==============\n', req.query);
+  console.log('==============payment-result req==============\n', req.body);
+  res.json({ code: 1 });
 });
 
 /**
@@ -124,8 +124,6 @@ app.post('/save-data', async (req, res) => {
 
 app.listen(PORT, () =>
   console.log(
-    `DotWallet example app listening at ${
-      process.env.NODE_ENV === 'production' ? 'production host' : ip.address() + ':' + PORT
-    }`,
+    `DotWallet example app listening at ${process.env.NODE_ENV === 'production' ? 'production host' : appUrl}`,
   ),
 );

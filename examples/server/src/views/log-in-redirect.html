@@ -20,7 +20,10 @@
       callAuth = async () => {
         const authCall = await fetch(`${APP_URL}/auth`, {
           method: 'POST',
-          body: JSON.stringify({ code }),
+          body: JSON.stringify({
+            code,
+            redirect_uri: `${APP_URL}/log-in-redirect`, // this must match step one
+          }),
           headers: {
             'Content-type': 'application/json; charset=UTF-8',
           },

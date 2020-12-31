@@ -20,12 +20,7 @@
     </nav>
 
     <div class="container d-flex d-flex flex-column align-items-center justify-content-center">
-      <img
-        class="img-fluid"
-        style="max-height: 500px"
-        src="./assets/logo/default.png"
-        alt="app logo"
-      />
+      <img class="img-fluid" style="max-height: 500px" src="./assets/logo/default.png" alt="app logo" />
       <a id="login-link" class="img-fluid m-0">
         <img src="./assets/dotwallet-login.png" alt="dotwallet-login" />
       </a>
@@ -34,11 +29,11 @@
     <script src="./config.js"></script>
 
     <script>
-      const scope = encodeURIComponent('user.info autopay.bsv autopay.btc autopay.eth');
+      const scope = encodeURIComponent('user.info autopay.bsv');
       const redirectURI = encodeURIComponent(`${APP_URL}/log-in-redirect`);
       const loginState = uuidv4();
       localStorage.setItem('loginState', loginState);
-      const loginURL = `${DOTWALLET_API}/authorize?client_id=${CLIENT_ID}&redirect_uri=${redirectURI}&response_type=code&state=${loginState}&scope=${scope}`;
+      const loginURL = `${DOTWALLET_CLIENT}/authorize?client_id=${CLIENT_ID}&redirect_uri=${redirectURI}&response_type=code&state=${loginState}&scope=${scope}`;
       // console.log('url\n', loginURL);
       document.getElementById('login-link').href = loginURL;
     </script>
