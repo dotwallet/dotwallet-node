@@ -75,13 +75,9 @@ app.post('/payment-result', (req, res) => {
  *
  */
 
-app.get('/autopayment-store', async (req, res) => {
-  res.sendFile(path.join(__dirname + '/autopayment-store.html'));
-});
-
-app.post('/create-autopayment', async (req, res) => {
-  const orderResultData = await dotwallet.autopayment(req.body, true);
-  console.log('orderResultData', orderResultData);
+app.post('/autopay', async (req, res) => {
+  const orderResultData = await dotwallet.autoPay(req.body, true);
+  // console.log('orderResultData', orderResultData);
   res.json(orderResultData);
 });
 

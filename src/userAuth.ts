@@ -44,7 +44,7 @@ export const getUserInfo = async (userAccessToken: string, log: boolean = false)
     console.log('############################### options', options);
 
     const userInfoRequest = await axios(`${DOTWALLET_API}/user/get_user_info`, options);
-    if (log) console.log('==============user info result==============\n', userInfoRequest);
+    if (log) console.log('==============user info result==============\n', userInfoRequest.data);
     return userInfoRequest.data.data as IUserData;
   } catch (err) {
     if (log) console.log('==============ERROR==============\n', err);

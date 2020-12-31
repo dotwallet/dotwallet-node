@@ -113,7 +113,7 @@
       // autopay
       document.getElementById('autopay-button').addEventListener('click', async () => {
         const autoPaymentResponse = await fetch(
-          APP_URL + '/create-autopayment', // replace with your IP
+          APP_URL + '/autopay', // replace with your IP
           {
             method: 'POST',
             body: JSON.stringify({ ...order, user_id: localStorage.getItem('id') }),
