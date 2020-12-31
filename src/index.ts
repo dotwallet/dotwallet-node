@@ -16,7 +16,7 @@ import {
 } from './types';
 // import { autopayment } from './autopayment';
 // import { saveData, getHostedAccount, hostedAccountBalance } from './saveData';
-import { getAppAccessToken } from './appAuth';
+import { requestAppAccessToken } from './appAuth';
 class DotWallet {
   CLIENT_ID: string = '';
   SECRET: string = '';
@@ -35,15 +35,27 @@ class DotWallet {
   // populateTokenMethods = () => {
   //   // when they return an expired token error, recursive call up to 2 times.
   // };
+  getSecret = () => this.SECRET;
+  getClientID = () => this.CLIENT_ID;
+  getAppAccessToken = () => this.appAccessToken;
+  setSecret = (SECRET: string) => {
+    this.SECRET = SECRET;
+  };
+  setClientID = (CLIENT_ID: string) => {
+    this.CLIENT_ID = CLIENT_ID;
+  };
+  setAppAccessToken = (token: string) => {
+    this.appAccessToken = token;
+  };
 
   init = async (CLIENT_ID: string, SECRET: string, log: boolean = false) => {
-    this.CLIENT_ID = CLIENT_ID;
-    this.SECRET = SECRET;
-    await getAppAccessToken(this, log);
+    this.setClientID(CLIENT_ID);
+    this.setSecret(SECRET);
+    await requestAppAccessToken(this, log);
 
     // the app access token will expire every 2 hours.
     setInterval(async () => {
-      getAppAccessToken(this, log);
+      requestAppAccessToken(this, log);
     }, 7200000);
     // this.refreshAccess = refreshAccess(this.CLIENT_ID, this);
   };

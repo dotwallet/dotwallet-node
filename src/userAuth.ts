@@ -8,8 +8,8 @@ export const getUserToken = ($this: DotWallet) => {
       if (log) console.log('==============got code==============\n', code);
       if (!code) throw Error('no code supplied. Supply one in the request body {code: <the_code>}');
       const data = {
-        client_id: $this.CLIENT_ID,
-        client_secret: $this.SECRET,
+        client_id: $this.getClientID(),
+        client_secret: $this.getSecret(),
         grant_type: 'authorization_code',
         code: code,
         redirect_uri: redirectUri,
@@ -55,8 +55,8 @@ export const refreshUserToken = ($this: DotWallet) => {
   return async (refreshToken: string, log: boolean = false) => {
     try {
       const data = {
-        client_id: $this.CLIENT_ID,
-        client_secret: $this.SECRET,
+        client_id: $this.getClientID(),
+        client_secret: $this.getSecret(),
         grant_type: 'refresh_token',
         refresh_token: refreshToken,
       };

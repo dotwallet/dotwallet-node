@@ -2,7 +2,7 @@ import axios, { AxiosRequestConfig } from 'axios';
 import { IPaymentOrder, IPaymentQuery } from './types';
 import { DOTWALLET_API } from './config';
 import DotWallet from './index';
-import { getAppAccessToken } from './appAuth';
+import { requestAppAccessToken } from './appAuth';
 
 async function createOrder(orderData: IPaymentOrder, appAccessToken: string, log: boolean = false) {
   try {
@@ -34,10 +34,10 @@ async function createOrder(orderData: IPaymentOrder, appAccessToken: string, log
 export const getOrderID = ($this: DotWallet) => {
   return async (order: IPaymentOrder, log: boolean = false): Promise<string | Error | undefined> => {
     try {
-      let orderIdResult = await createOrder(order, $this.appAccessToken, log);
+      let orderIdResult = await createOrder(order, $this.getAppAccessToken(), log);
       if (orderIdResult === 'expired token') {
-        await getAppAccessToken($this, log);
-        orderIdResult = await createOrder(order, $this.appAccessToken, log);
+        await requestAppAccessToken($this, log);
+        orderIdResult = await createOrder(order, $this.getAppAccessToken(), log);
       }
       if (log) console.log('==============orderIdResult==============\n', orderIdResult);
       return orderIdResult;
@@ -72,10 +72,10 @@ const orderStatus = async (orderID: string, appAccessToken: string, log: boolean
 export const getOrderStatus = ($this: DotWallet) => {
   return async (orderID: string, log: boolean = false) => {
     try {
-      let orderStatusResult = await orderStatus(orderID, $this.appAccessToken, log);
+      let orderStatusResult = await orderStatus(orderID, $this.getAppAccessToken(), log);
       if (orderStatusResult === 'expired token') {
-        await getAppAccessToken($this, log);
-        orderStatusResult = await orderStatus(orderID, $this.appAccessToken, log);
+        await requestAppAccessToken($this, log);
+        orderStatusResult = await orderStatus(orderID, $this.getAppAccessToken(), log);
       }
       if (log) console.log('==============orderStatusResult==============\n', orderStatusResult);
       return orderStatusResult;
