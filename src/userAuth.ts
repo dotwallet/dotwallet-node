@@ -26,6 +26,7 @@ export const getUserToken = ($this: DotWallet) => {
       }
     } catch (err) {
       if (log) console.log('==============ERROR==============\n', err);
+      return { error: err };
     }
   };
 };
