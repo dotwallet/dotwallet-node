@@ -1,20 +1,8 @@
 // import { Request, Response, NextFunction } from 'express';
 import { getUserToken, getUserInfo, refreshUserToken } from './userAuth';
 import { getOrderID, getOrderStatus } from './order';
-import {
-  IUserData,
-  IUserAccessTokenData,
-  IPaymentOrder,
-  // IOrderData,
-  // IOrderStatusInfo,
-  // IOrderResponseData,
-  // IAutoPaymentOrder,
-  // dataType,
-  // IGetHostedResponse,
-  // IGetBalanceResponse,
-  // ISaveDataResponse,
-} from './types';
-// import { autopayment } from './autopayment';
+import { IUserData, IUserAccessTokenData, IPaymentOrder, IAutoPayOrder } from './types';
+import { autoPay } from './autopay';
 // import { saveData, getHostedAccount, hostedAccountBalance } from './saveData';
 import { requestAppAccessToken } from './appAuth';
 class DotWallet {
@@ -48,16 +36,16 @@ class DotWallet {
     this.appAccessToken = token;
   };
 
-  init = async (CLIENT_ID: string, SECRET: string, log: boolean = false) => {
+  init = async (CLIENT_ID: string, CLIENT_SECRET: string, log: boolean = false) => {
     this.setClientID(CLIENT_ID);
-    this.setSecret(SECRET);
+    this.setSecret(CLIENT_SECRET);
     await requestAppAccessToken(this, log);
 
     // the app access token will expire every 2 hours.
     setInterval(async () => {
       requestAppAccessToken(this, log);
     }, 7200000);
-    // this.refreshAccess = refreshAccess(this.CLIENT_ID, this);
+    // this.refreshAccess = refreshAccess(this);
   };
 
   /**
@@ -67,10 +55,9 @@ class DotWallet {
    * @example 
   app.post('/auth', async (req, res, next) => {
     const authTokenData = await dotwallet.getUserToken(req.body.code, req.body.redirect_uri, true);
+    const userAccessToken = authTokenData.access_token;
     res.json({ ...authTokenData });
-  });
-   * @returns {object} { access_token: 'JWT access token', expires_in: number, token_type: 'Bearer', refresh_token: string, scope: string
-}
+    });
    */
   getUserToken = getUserToken(this);
 
@@ -85,30 +72,12 @@ class DotWallet {
 
   getOrderStatus = getOrderStatus(this);
 
-  // getOrderStatus: (merchant_order_sn: string) => Promise<IOrderStatusInfo | Error | undefined> = getOrderStatus(
-  //   this.CLIENT_ID,
-  //   this.SECRET,
-  // );
-
-  // /**
-  //  * @summary Send out a payment on behalf of a wallet that has authorized auto-payments
-  //  * @param { IAutoPaymentOrder } orderData a valid order as a js object (see the docs or this IAutoPaymentOrder type)
-  //  * @returns { IOrderResponseData } The order
-  //  */
-  // autopayment: (
-  //   orderData: IAutoPaymentOrder,
-  //   log?: boolean | undefined,
-  // ) => Promise<IOrderResponseData | Error | undefined> = autopayment(this.SECRET);
-
-  // getHostedAccount: (
-  //   coinType?: string,
-  //   log?: boolean | undefined,
-  // ) => Promise<IGetHostedResponse | Error | undefined> = getHostedAccount(this.CLIENT_ID, this.SECRET);
-
-  // hostedAccountBalance: (
-  //   coinType?: string,
-  //   log?: boolean | undefined,
-  // ) => Promise<IGetBalanceResponse | Error | undefined> = hostedAccountBalance(this.CLIENT_ID, this.SECRET);
+  /**
+   * @summary Send out a payment on behalf of a wallet that has authorized auto-payments
+   * @param { IAutoPayOrder } orderData a valid order as a js object (see the docs or this IAutoPayOrder type)
+   * @returns { IAutoPayResponse | { error: 'balance too low'} } The order response. If balance too low, returns { error: 'balance too low'}
+   */
+  autoPay = autoPay(this);
 
   // /**
   //  * @param {dataType} dataType 0 for string and 1 for rawhex. If you select 0 (the default) we will JSON.stringify() the data to be saved on chain

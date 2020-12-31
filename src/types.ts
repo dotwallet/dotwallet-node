@@ -86,3 +86,12 @@ export interface IPaymentQuery {
   transaction: Transaction;
   txid: string;
 }
+
+export interface IAutoPayResponse {
+  order_id: string;
+  out_order_id: string;
+  user_id: string;
+  amount: number;
+  fee: number;
+  txid: string;
+}
