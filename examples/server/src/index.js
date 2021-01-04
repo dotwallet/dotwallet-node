@@ -58,7 +58,9 @@ app.post('/create-order', async (req, res) => {
   const orderID = await dotwallet.getOrderID(req.body, true);
   setTimeout(async () => {
     const orderStatus = await dotwallet.getOrderStatus(orderID, true);
+    // console.log('orderStatus', orderStatus);
     const tx = await dotwallet.queryTx(orderStatus.txid, true);
+    // console.log('tx', tx);
   }, 1000 * 60);
   res.json({ order_id: orderID });
 });

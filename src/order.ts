@@ -63,7 +63,7 @@ const orderStatus = async (orderID: string, appAccessToken: string, log: boolean
     const orderStatusResponse = await axios(`${DOTWALLET_API}/transact/order/get_order`, options);
     if (!orderStatusResponse.data || orderStatusResponse.data.code !== 0) throw orderStatusResponse;
     if (orderStatusResponse.data.code === 75000) return { error: 'expired token' };
-    const orderStatusData: IPaymentQuery = orderStatusResponse.data;
+    const orderStatusData: IPaymentQuery = orderStatusResponse.data.data;
     if (log) console.log('==============order Status result==============\n', orderStatusData);
     return { orderStatusData };
   } catch (error) {
@@ -80,7 +80,7 @@ export const getOrderStatus = ($this: DotWallet) => {
         await requestAppAccessToken($this, log);
         orderStatusResult = await orderStatus(orderID, $this.getAppAccessToken(), log);
       }
-      if (log) console.log('==============orderStatusResult==============\n', orderStatusResult);
+      // if (log) console.log('==============orderStatusResult==============\n', orderStatusResult);
       if (orderStatusResult?.error) throw orderStatusResult.error;
       else return orderStatusResult?.orderStatusData as IPaymentQuery;
     } catch (error) {
