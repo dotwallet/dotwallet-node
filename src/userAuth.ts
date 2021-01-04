@@ -5,7 +5,7 @@ import DotWallet from './index';
 export const getUserToken = ($this: DotWallet) => {
   return async (code: string, redirectUri: string, log: boolean = false) => {
     try {
-      if (log) console.log('==============got code==============\n', code);
+      if (log) console.log('==============getUserToken code==============\n', code);
       if (!code) throw Error('no code supplied. Supply one in the request body {code: <the_code>}');
       const data = {
         client_id: $this.getClientID(),
@@ -16,7 +16,7 @@ export const getUserToken = ($this: DotWallet) => {
       };
       console.log(data);
       const accessTokenRequest = await axios.post(`${DOTWALLET_API}/oauth2/get_access_token`, data);
-      if (log) console.log('==============access token result==============\n', accessTokenRequest.data);
+      if (log) console.log('==============getUserToken result==============\n', accessTokenRequest.data);
       if (!accessTokenRequest.data.data.access_token || accessTokenRequest.data.code !== 0) throw accessTokenRequest;
       else {
         const result: IUserAccessTokenData = {
@@ -24,9 +24,9 @@ export const getUserToken = ($this: DotWallet) => {
         };
         return result;
       }
-    } catch (err) {
-      if (log) console.log('==============ERROR==============\n', err);
-      return { error: err };
+    } catch (error) {
+      if (log) console.log('==============getUserToken ERROR==============\n', error);
+      return { error };
     }
   };
 };
@@ -42,10 +42,11 @@ export const getUserInfo = async (userAccessToken: string, log: boolean = false)
       method: 'POST',
     };
     const userInfoRequest = await axios(`${DOTWALLET_API}/user/get_user_info`, options);
-    if (log) console.log('==============user info result==============\n', userInfoRequest.data);
+    if (log) console.log('==============getUserInfo result==============\n', userInfoRequest.data);
     return userInfoRequest.data.data as IUserData;
-  } catch (err) {
-    if (log) console.log('==============ERROR==============\n', err);
+  } catch (error) {
+    if (log) console.log('==============getUserInfo ERROR==============\n', error);
+    return { error };
   }
 };
 
@@ -69,7 +70,8 @@ export const refreshUserToken = ($this: DotWallet) => {
         return result;
       }
     } catch (error) {
-      if (log) console.log('==============ERROR==============\n', error);
+      if (log) console.log('==============refreshUserToken ERROR==============\n', error);
+      return { error };
     }
   };
 };

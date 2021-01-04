@@ -97,12 +97,12 @@ export interface IAutoPayResponse {
 
 export interface IVinVout {
   index: number;
-  script: string;
+  script_hex: string;
   value: number;
 }
 
 export interface ITXInquiry {
-  txid: string;
+  transaction_hash: string;
   vins: IVinVout[];
   vouts: IVinVout[];
   height: number;

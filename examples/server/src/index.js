@@ -58,7 +58,7 @@ app.post('/create-order', async (req, res) => {
   const orderID = await dotwallet.getOrderID(req.body, true);
   setTimeout(async () => {
     const orderStatus = await dotwallet.getOrderStatus(orderID, true);
-    // console.log('==============orderStatus==============\n', orderStatus);
+    const tx = await dotwallet.queryTx(orderStatus.txid, true);
   }, 1000 * 60);
   res.json({ order_id: orderID });
 });
@@ -100,9 +100,9 @@ app.post('/save-data', async (req, res) => {
       tag: 'banana-price',
     }); //in a real app this would go to DB
     res.json(saveData);
-  } catch (err) {
-    console.log('==============err==============\n', err);
-    res.json(err);
+  } catch (error) {
+    console.log('==============error==============\n', error);
+    res.json(error);
   }
 });
 
@@ -110,9 +110,9 @@ app.post('/get-tx-data', async (req, res) => {
   try {
     const savedData = await dotwallet.getSavedData(req.body.txid, true);
     res.json(savedData);
-  } catch (err) {
-    console.log('==============err==============\n', err);
-    res.json(err);
+  } catch (error) {
+    console.log('==============error==============\n', error);
+    res.json(error);
   }
 });
 

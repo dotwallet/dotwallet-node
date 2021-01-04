@@ -6,9 +6,8 @@ import { requestAppAccessToken } from './appAuth';
 
 async function createOrder(orderData: IPaymentOrder, appAccessToken: string, log: boolean = false) {
   try {
-    console.log('==============orderData==============\n', orderData);
-    console.log('==============appAccessToken==============\n', appAccessToken);
-
+    console.log('==============createOrder orderData==============\n', orderData);
+    // console.log('==============appAccessToken==============\n', appAccessToken);
     const options: AxiosRequestConfig = {
       headers: {
         'Content-Type': 'application/json',
@@ -19,31 +18,34 @@ async function createOrder(orderData: IPaymentOrder, appAccessToken: string, log
     };
     const orderIDResponse = await axios(`${DOTWALLET_API}/transact/order/create`, options);
     const orderIDData = orderIDResponse.data;
-    if (log) console.log('==============orderIDData==============', orderIDData);
-    if (orderIDData.code === 75000) return 'expired token';
+    if (log) console.log('==============createOrder orderIDData==============', orderIDData);
+    if (orderIDData.code === 75000) return { error: 'expired token' };
     else if (orderIDData.data && orderIDData.code == 0 && orderIDData.data) {
-      return orderIDData.data;
+      return { orderID: orderIDData.data as string };
     } else {
-      return { error: orderIDData.data ? orderIDData.data : orderIDData };
+      throw orderIDData.data ? orderIDData.data : orderIDData;
     }
-  } catch (err) {
-    if (log) console.log('==============err==============\n', err);
+  } catch (error) {
+    if (log) console.log('==============createOrder error==============\n', error);
+    return { error };
   }
 }
 
 export const getOrderID = ($this: DotWallet) => {
-  return async (order: IPaymentOrder, log: boolean = false): Promise<string | Error | undefined> => {
+  return async (order: IPaymentOrder, log: boolean = false) => {
     try {
       let orderIdResult = await createOrder(order, $this.getAppAccessToken(), log);
-      if (orderIdResult === 'expired token') {
+      if (orderIdResult.error === 'expired token') {
         await requestAppAccessToken($this, log);
         orderIdResult = await createOrder(order, $this.getAppAccessToken(), log);
       }
+      if (orderIdResult.error) throw orderIdResult.error;
+
       if (log) console.log('==============orderIdResult==============\n', orderIdResult);
-      return orderIdResult;
-    } catch (err) {
-      if (log) console.log('==============err==============\n', err);
-      return err;
+      return orderIdResult.orderID as string;
+    } catch (error) {
+      if (log) console.log('==============error==============\n', error);
+      return { error };
     }
   };
 };
@@ -60,12 +62,13 @@ const orderStatus = async (orderID: string, appAccessToken: string, log: boolean
     };
     const orderStatusResponse = await axios(`${DOTWALLET_API}/transact/order/get_order`, options);
     if (!orderStatusResponse.data || orderStatusResponse.data.code !== 0) throw orderStatusResponse;
-    if (orderStatusResponse.data.code === 75000) return 'expired token';
+    if (orderStatusResponse.data.code === 75000) return { error: 'expired token' };
     const orderStatusData: IPaymentQuery = orderStatusResponse.data;
     if (log) console.log('==============order Status result==============\n', orderStatusData);
-    return orderStatusData;
-  } catch (err) {
-    if (log) console.log('==============err==============\n', err);
+    return { orderStatusData };
+  } catch (error) {
+    if (log) console.log('==============error==============\n', error);
+    return { error };
   }
 };
 
@@ -73,15 +76,16 @@ export const getOrderStatus = ($this: DotWallet) => {
   return async (orderID: string, log: boolean = false) => {
     try {
       let orderStatusResult = await orderStatus(orderID, $this.getAppAccessToken(), log);
-      if (orderStatusResult === 'expired token') {
+      if (orderStatusResult?.error === 'expired token') {
         await requestAppAccessToken($this, log);
         orderStatusResult = await orderStatus(orderID, $this.getAppAccessToken(), log);
       }
       if (log) console.log('==============orderStatusResult==============\n', orderStatusResult);
-      return orderStatusResult;
-    } catch (err) {
-      if (log) console.log('==============err==============\n', err);
-      return err;
+      if (orderStatusResult?.error) throw orderStatusResult.error;
+      else return orderStatusResult?.orderStatusData as IPaymentQuery;
+    } catch (error) {
+      if (log) console.log('==============error==============\n', error);
+      return { error };
     }
   };
 };

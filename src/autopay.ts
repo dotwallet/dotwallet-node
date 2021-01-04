@@ -33,9 +33,9 @@ export const autoPay = ($this: DotWallet) => {
         return { error: 'balance too low' };
       } else if (orderResponseData.code !== 0) throw orderResponseData;
       else return orderResponseData.data as IAutoPayResponse;
-    } catch (err) {
-      console.log('==============err==============\n', err);
-      return { error: err };
+    } catch (error) {
+      console.log('==============autoPay error==============\n', error);
+      return { error };
     }
   };
 };

@@ -24,7 +24,8 @@ export const saveData = ($this: DotWallet) => {
   ) => {
     try {
       const hexEncoded = Buffer.from(JSON.stringify(data), 'utf8').toString('hex');
-      if (log) console.log('==============received: data, userID, options==============\n', data, userID, options);
+      if (log)
+        console.log('==============saveData received: data, userID, options==============\n', data, userID, options);
       const orderData: IAutoPayOrder = {
         user_id: userID,
         out_order_id: options?.out_order_id || uuid(),
@@ -56,7 +57,7 @@ export const saveData = ($this: DotWallet) => {
       const callApi = () => axios(`${DOTWALLET_API}/transact/order/autopay`, requestOptions);
       let orderResponse = await callApi();
       let orderResponseData = orderResponse.data;
-      if (log) console.log('==============orderResponseData==============', orderResponseData);
+      if (log) console.log('==============saveData orderResponseData==============', orderResponseData);
       if (orderResponseData.code === 75000) {
         await requestAppAccessToken($this, log);
         orderResponse = await callApi();
@@ -79,7 +80,7 @@ export const saveData = ($this: DotWallet) => {
 export const getSavedData = ($this: DotWallet) => {
   return async (txid: string, log: boolean = false) => {
     try {
-      if (log) console.log('==============txid==============\n', txid);
+      if (log) console.log('==============getSavedData txid==============\n', txid);
       const options: AxiosRequestConfig = {
         headers: {
           'Content-Type': 'application/json',
@@ -91,15 +92,15 @@ export const getSavedData = ($this: DotWallet) => {
       const callApi = () => axios(`${DOTWALLET_API}/bsvchain/get_transaction`, options);
       let response = await callApi();
       let responseData = response.data;
-      if (log) console.log('==============responseData==============', responseData);
+      if (log) console.log('==============getSavedData responseData==============', responseData);
       if (responseData.code === 75000) {
         await requestAppAccessToken($this, log);
         response = await callApi();
         responseData = response.data;
       }
       let data: any;
-      const txInquiry: any = responseData.data;
-      txInquiry.vouts.forEach((vout: any) => {
+      const txInquiry: ITXInquiry = responseData.data;
+      txInquiry.vouts.forEach((vout) => {
         if (vout.script_hex.startsWith('006a')) {
           const hexDecoded = Buffer.from(
             vout.script_hex.slice(4), // slice off the '006a'
@@ -110,7 +111,7 @@ export const getSavedData = ($this: DotWallet) => {
       });
       return data;
     } catch (error) {
-      if (log) console.log('==============check tx err==============\n', error);
+      if (log) console.log('==============getSavedData error==============\n', error);
       return { error };
     }
   };

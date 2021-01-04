@@ -1,16 +1,15 @@
-// import { Request, Response, NextFunction } from 'express';
-import { getUserToken, getUserInfo, refreshUserToken } from './userAuth';
+import { getUserToken, getUserInfo } from './userAuth';
 import { getOrderID, getOrderStatus } from './order';
-import { IUserData, IUserAccessTokenData, IPaymentOrder, IAutoPayOrder } from './types';
+import { queryTx } from './query';
 import { autoPay } from './autopay';
 import { saveData, getSavedData } from './saveData';
 import { requestAppAccessToken } from './appAuth';
+
 class DotWallet {
   CLIENT_ID: string = '';
   SECRET: string = '';
   appAccessToken: string = '';
-
-  // refreshAppAuth = async () => {};
+  // not sure if we need this, seems like the the values are getting repopulated without it
   // populateStaticMethods = () => {
   //   this.getUserToken = getUserToken(this.CLIENT_ID, this.SECRET);
   //   this.paymentOrder = paymentOrder(this.CLIENT_ID, this.SECRET);
@@ -19,9 +18,6 @@ class DotWallet {
   //   this.getHostedAccount = getHostedAccount(this.CLIENT_ID, this.SECRET);
   //   this.hostedAccountBalance = hostedAccountBalance(this.CLIENT_ID, this.SECRET);
   //   this.saveData = saveData(this.CLIENT_ID, this.SECRET);
-  // };
-  // populateTokenMethods = () => {
-  //   // when they return an expired token error, recursive call up to 2 times.
   // };
   getSecret = () => this.SECRET;
   getClientID = () => this.CLIENT_ID;
@@ -45,7 +41,7 @@ class DotWallet {
     setInterval(async () => {
       requestAppAccessToken(this, log);
     }, 7200000);
-    // this.refreshAccess = refreshAccess(this);
+    // this.populateStaticMethods();
   };
 
   /**
@@ -61,6 +57,11 @@ class DotWallet {
    */
   getUserToken = getUserToken(this);
 
+  /**
+   * @summary Get a user's basic profile information. Permission for this must have been set with the scope "user.info"
+   * @param {string} userAccessToken the user access token that includes the scope
+   * @param {boolean} log whether to console.log() internal events
+   */
   getUserInfo = getUserInfo;
 
   /**
@@ -71,6 +72,11 @@ class DotWallet {
    */
   getOrderID = getOrderID(this);
 
+  /**
+   * @summary Check the status of a dotwallet order.
+   * @param {string} orderID the order ID of the payment
+   * @param {boolean} log whether to console.log() internal events
+   */
   getOrderStatus = getOrderStatus(this);
 
   /**
@@ -90,7 +96,19 @@ class DotWallet {
    */
   saveData = saveData(this);
 
+  /**
+   * @summary Retrieve data stored on the BSV block chain.
+   * @param {string} txid the transaction ID of the transaction where the data was saved
+   * @param {boolean} log whether to console.log() internal events
+   */
   getSavedData = getSavedData(this);
+
+  /**
+   * @summary Examine a transaction
+   * @param { string } txid The transaction ID you'd like to query
+   * @param {boolean} log whether to console.log() internal events
+   */
+  queryTx = queryTx(this);
 }
 
 export = DotWallet;
