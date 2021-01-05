@@ -1,7 +1,7 @@
 import { getUserToken, getUserInfo } from './userAuth';
 import { getOrderID, getOrderStatus } from './order';
 import { queryTx } from './query';
-import { autoPay } from './autopay';
+import { autoPay, getAutoPayBalance } from './autopay';
 import { saveData, getSavedData } from './saveData';
 import { requestAppAccessToken } from './appAuth';
 
@@ -90,6 +90,14 @@ class DotWallet {
    * @returns { IAutoPayResponse | { error: 'balance too low'} } The order response. If balance too low, returns { error: 'balance too low'}
    */
   autoPay = autoPay(this);
+
+  /**
+   * @summary Get the user's automatic payments account balance. **NOTE: Requires user has authorized automatic payments
+   * @param {string} coinType currency, BSV, BTC, ETH
+   * @param {string} userID the user_id of the wallet you'd like to query
+   * @param {boolean} log whether to console.log() internal events
+   */
+  getAutoPayBalance = getAutoPayBalance(this);
 
   /**
    * @summary Save data on chain using an automatic payment. **NOTE: Requires wallet has authorized automatic payments and has sufficient balance

@@ -95,6 +95,13 @@ export interface IAutoPayResponse {
   txid: string;
 }
 
+export interface IAutoPayBalance {
+  /** Confirmed Balance */
+  confirm: number;
+  /** Unconfirmed Balance */
+  unconfirm: number;
+}
+
 export interface IVinVout {
   index: number;
   script_hex: string;

@@ -80,6 +80,8 @@ app.post('/payment-result', (req, res) => {
  *
  */
 app.post('/autopay', async (req, res) => {
+  const balance = await dotwallet.getAutoPayBalance(req.body.user_id);
+  // console.log('balance', balance);
   const orderResultData = await dotwallet.autoPay(req.body, true);
   // console.log('orderResultData', orderResultData);
   res.json(orderResultData);
