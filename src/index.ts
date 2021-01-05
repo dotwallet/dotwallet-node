@@ -32,6 +32,10 @@ class DotWallet {
     this.appAccessToken = token;
   };
 
+  /**
+   * @summary initialize DotWallet with your credentials from DotWallet for Developers
+   * @param {boolean} log whether to console.log() internal events
+   */
   init = async (CLIENT_ID: string, CLIENT_SECRET: string, log: boolean = false) => {
     this.setClientID(CLIENT_ID);
     this.setSecret(CLIENT_SECRET);
