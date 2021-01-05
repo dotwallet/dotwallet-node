@@ -132,7 +132,7 @@
     </script>
     <script>
       // Save data on chain (with autopay)
-      const saveData = {
+      const dataToSave = {
         bananas: 546,
         moreBananas: 746,
         yetMoreBananas: 946,
@@ -142,7 +142,7 @@
           APP_URL + '/save-data', // replace with your IP
           {
             method: 'POST',
-            body: JSON.stringify({ saveData, userID: localStorage.getItem('id') }),
+            body: JSON.stringify({ dataToSave, userID: localStorage.getItem('id') }),
             headers: {
               'Content-type': 'application/json; charset=UTF-8',
             },
