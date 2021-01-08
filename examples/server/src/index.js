@@ -55,17 +55,20 @@ app.post('/auth', async (req, res) => {
  */
 app.post('/create-order', async (req, res) => {
   const order = { ...req.body };
-  const orderID = await dotwallet.getOrderID(req.body, true);
+  const orderIDCall = await dotwallet.getOrderID(req.body, true);
+  if (orderIDCall.error) res.json(orderIDCall);
+  else {
+    // optional, check the order status:
+    setTimeout(async () => {
+      const orderStatus = await dotwallet.getOrderStatus(orderIDCall, true);
+      // console.log('orderStatus', orderStatus);
+      // optional, check the blockchain transaction
+      const tx = await dotwallet.queryTx(orderStatus.txid, true);
+      // console.log('tx', tx);
+    }, 1000 * 60);
 
-  // optional, check the order status:
-  setTimeout(async () => {
-    const orderStatus = await dotwallet.getOrderStatus(orderID, true);
-    // console.log('orderStatus', orderStatus);
-    // optional, check the blockchain transaction
-    const tx = await dotwallet.queryTx(orderStatus.txid, true);
-    // console.log('tx', tx);
-  }, 1000 * 60);
-  res.json({ order_id: orderID });
+    res.json({ order_id: orderIDCall });
+  }
 });
 
 app.post('/payment-result', (req, res) => {

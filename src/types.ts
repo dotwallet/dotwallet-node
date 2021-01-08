@@ -23,7 +23,7 @@ export interface IUserData {
 }
 
 export interface IPaymentToObject {
-  type: string;
+  type: 'address' | 'script';
   content: string;
   amount: number;
 }
@@ -37,12 +37,12 @@ export interface IOrder {
     name: string;
     detail?: string;
   };
+  badge_code?: string;
   subject?: string;
   notify_url?: string;
-  redirect_uri?: string;
 }
 export interface IPaymentOrder extends IOrder {
-  redirect_uri: string;
+  redirect_uri?: string;
   expires?: number;
 }
 export interface IAutoPayOrder extends IOrder {

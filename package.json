@@ -1,6 +1,6 @@
 {
   "name": "dotwallet-node",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "SDK for backend servers interacting with DotWallet for Developers APIs",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -18,8 +18,7 @@
   "keywords": [
     "dotwallet",
     "bitcoin",
-    "bitcoin",
-    "SV",
+    "bitcoin SV",
     "BSV",
     "crypto",
     "wallet"

@@ -23,7 +23,7 @@ async function createOrder(orderData: IPaymentOrder, appAccessToken: string, log
     else if (orderIDData.data && orderIDData.code == 0 && orderIDData.data) {
       return { orderID: orderIDData.data as string };
     } else {
-      throw orderIDData.data ? orderIDData.data : orderIDData;
+      throw orderIDData;
     }
   } catch (error) {
     if (log) console.log('==============createOrder error==============\n', error);
@@ -44,7 +44,7 @@ export const getOrderID = ($this: DotWallet) => {
       if (log) console.log('==============orderIdResult==============\n', orderIdResult);
       return orderIdResult.orderID as string;
     } catch (error) {
-      if (log) console.log('==============error==============\n', error);
+      if (log) console.log('==============getOrderID error==============\n', error);
       return { error };
     }
   };
@@ -67,7 +67,7 @@ const orderStatus = async (orderID: string, appAccessToken: string, log: boolean
     if (log) console.log('==============order Status result==============\n', orderStatusData);
     return { orderStatusData };
   } catch (error) {
-    if (log) console.log('==============error==============\n', error);
+    if (log) console.log('==============orderStatus error==============\n', error);
     return { error };
   }
 };

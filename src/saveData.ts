@@ -44,7 +44,6 @@ export const saveData = ($this: DotWallet) => {
         },
         subject: options?.subject,
         notify_url: options?.notify_url,
-        redirect_uri: options?.notify_url,
       };
       const requestOptions: AxiosRequestConfig = {
         headers: {

@@ -16,6 +16,8 @@ export const autoPay = ($this: DotWallet) => {
         method: 'POST',
         data: order,
       };
+      if (log) console.log('==============auto pay received order ==============', order);
+
       const callApi = () => axios(`${DOTWALLET_API}/transact/order/autopay`, options);
       let orderResponse = await callApi();
       let orderResponseData = orderResponse.data;
