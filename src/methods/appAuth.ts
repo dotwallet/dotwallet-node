@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { IAppAccessTokenData } from './types';
-import DotWallet from './index';
+import { IAppAccessTokenData } from '../types';
+import DotWallet from '../index';
 export const requestAppAccessToken = async ($this: DotWallet, log: boolean = false) => {
   try {
     const data = {

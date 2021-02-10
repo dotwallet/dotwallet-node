@@ -1,6 +1,6 @@
 # dotwallet-node
 
-An SDK for quickly building a server that uses DotWallet for Developers's APIs for logins, payments, and other blockchain services.
+An SDK for quickly building a server that uses DotWallet for Developers' APIs for logins, payments, and other blockchain services.
 
 This SDK automatically handles the refreshing of user and app access tokens and provides common error handling.
 
@@ -70,4 +70,14 @@ build sdk first, then example
 cd examples/server/
 npm i
 npm run dev
+```
+
+### Test
+
+the tests expect a .env file in the root with CLIENT_ID and CLIENT_SECRET
+
+```
+npm run test
+#or
+npm run test:watch
 ```

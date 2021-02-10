@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
-import { ITXInquiry } from './types';
-import DotWallet from './index';
-import { DOTWALLET_API } from './config';
+import { ITXInquiry } from '../types';
+import DotWallet from '../index';
+import { DOTWALLET_API } from '../config';
 import { requestAppAccessToken } from './appAuth';
 
 export const queryTx = ($this: DotWallet) => {

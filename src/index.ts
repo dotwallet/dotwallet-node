@@ -1,9 +1,9 @@
-import { getUserToken, getUserInfo } from './userAuth';
-import { getOrderID, getOrderStatus } from './order';
-import { queryTx } from './query';
-import { autoPay, getAutoPayBalance } from './autopay';
-import { saveData, getSavedData } from './saveData';
-import { requestAppAccessToken } from './appAuth';
+import { getUserToken, getUserInfo } from './methods/userAuth';
+import { getOrderID, getOrderStatus } from './methods/order';
+import { queryTx } from './methods/query';
+import { autoPay, getAutoPayBalance } from './methods/autopay';
+import { saveData, getSavedData } from './methods/saveData';
+import { requestAppAccessToken } from './methods/appAuth';
 
 class DotWallet {
   CLIENT_ID: string = '';

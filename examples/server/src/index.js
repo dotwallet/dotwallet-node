@@ -2,9 +2,9 @@ const express = require('express');
 const path = require('path');
 const dotenv = require('dotenv');
 dotenv.config({ path: './.env' });
-
+const axios = require('axios');
+const jwt = require('jsonwebtoken');
 const app = express();
-const bodyParser = require('body-parser');
 const cors = require('cors');
 var ip = require('ip');
 const url = require('url');
@@ -17,15 +17,35 @@ const DotWallet = require('../../../lib/index.js');
 const dotwallet = new DotWallet();
 dotwallet.init(YOUR_CLIENT_ID, YOUR_CLIENT_SECRET, true);
 app.use(cors());
-app.use(bodyParser.json());
+// app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(express.static('src'));
+
+// API docs
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
+const options = {
+  swaggerDefinition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'DotWallet Microservice',
+      version: '1.0.0',
+      description: 'A server for using DotWallets APIs',
+    },
+  },
+  // List of files to be processes. You can also set globs './routes/*.js'
+  apis: ['index.js'],
+};
+const specs = swaggerJsdoc(options);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 // static pages
 app.get('/', async (req, res) => {
   res.sendFile(path.join(__dirname + '/views/index.html'));
 });
-// client-side page to receive the code after user confirms login. Could be done on the same login page, but separated here to show steps
 app.get('/log-in-redirect', async (req, res) => {
+  // client-side page to receive the code after user confirms login. Could be done on the same login page, but separated here to show steps
   res.sendFile(path.join(__dirname + '/views/log-in-redirect.html'));
 });
 app.get('/logged-in', async (req, res) => {
@@ -40,20 +60,47 @@ app.get('/store-front', async (req, res) => {
  * ============================AUTHENTICATION============================
  *
  */
+
+/**
+ * @swagger
+ * /auth:
+ *   post:
+ *     produces:
+ *       - application/json
+ *     parameters
+ */
 app.post('/auth', async (req, res) => {
   const authTokenData = await dotwallet.getUserToken(req.body.code, req.body.redirect_uri, true);
   const userAccessToken = authTokenData.access_token;
   console.log('userAccessToken', userAccessToken);
   const userInfo = await dotwallet.getUserInfo(userAccessToken, true);
-  res.json({ ...userInfo, ...authTokenData });
+
+  const token = jwt.sign({ userID: '' }, YOUR_CLIENT_SECRET, { expiresIn: req.body.tokenExpiry || '1h' });
+  const returnData = { ...userInfo, ...authTokenData, serverToken: token };
+  res.json(returnData);
+  // optionally alert your main backend server that the login was sucessful, and send the info there.
+  // subsequent requests can be made from server or client as long as they have a valid token
+  if (req.body.token_redirect) {
+    axios.post(req.body.token_redirect, returnData);
+  }
 });
+
+const checkToken = (req, res, next) => {
+  const token = req.body.serverToken;
+  try {
+    jwt.verify(token, YOUR_CLIENT_SECRET);
+    next();
+  } catch (error) {
+    return { error };
+  }
+};
 
 /**
  *
  * ============================PAYMENT============================
  *
  */
-app.post('/create-order', async (req, res) => {
+app.post('/create-order', checkToken, async (req, res) => {
   const order = { ...req.body };
   const orderIDCall = await dotwallet.getOrderID(req.body, true);
   if (orderIDCall.error) res.json(orderIDCall);
@@ -82,9 +129,12 @@ app.post('/payment-result', (req, res) => {
  * ============================AUTOMATIC PAYMENTS============================
  *
  */
-app.post('/autopay', async (req, res) => {
+app.post('/autopay', checkToken, async (req, res) => {
+  // check to make sure user is same as payer user.
+  // jwt = { userID: ... }
   const balance = await dotwallet.getAutoPayBalance(req.body.user_id);
   // console.log('balance', balance);
+  // check to make sure balance is enough
   const orderResultData = await dotwallet.autoPay(req.body, true);
   // console.log('orderResultData', orderResultData);
   res.json(orderResultData);

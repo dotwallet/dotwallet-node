@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
-import { IUserAccessTokenData, IUserData } from './types';
-import { DOTWALLET_API } from './config';
-import DotWallet from './index';
+import { IUserAccessTokenData, IUserData } from '../types';
+import { DOTWALLET_API } from '../config';
+import DotWallet from '../index';
 export const getUserToken = ($this: DotWallet) => {
   return async (code: string, redirectUri: string, log: boolean = false) => {
     try {

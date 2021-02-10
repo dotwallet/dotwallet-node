@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
-import { IPaymentOrder, IPaymentQuery } from './types';
-import { DOTWALLET_API } from './config';
-import DotWallet from './index';
+import { IPaymentOrder, IPaymentQuery } from '../types';
+import { DOTWALLET_API } from '../config';
+import DotWallet from '../index';
 import { requestAppAccessToken } from './appAuth';
 
 async function createOrder(orderData: IPaymentOrder, appAccessToken: string, log: boolean = false) {

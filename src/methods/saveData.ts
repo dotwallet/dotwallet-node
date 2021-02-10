@@ -1,8 +1,8 @@
 import axios, { AxiosRequestConfig } from 'axios';
-import { IAutoPayResponse, IAutoPayOrder, ITXInquiry } from './types';
+import { IAutoPayResponse, IAutoPayOrder, ITXInquiry } from '../types';
 import { v4 as uuid } from 'uuid';
-import DotWallet from './index';
-import { DOTWALLET_API } from './config';
+import DotWallet from '../index';
+import { DOTWALLET_API } from '../config';
 import { requestAppAccessToken } from './appAuth';
 
 export const saveData = ($this: DotWallet) => {
