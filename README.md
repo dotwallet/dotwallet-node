@@ -1,6 +1,6 @@
 # dotwallet-node
 
-An SDK for quickly building a server that uses DotWallet for Developers' APIs for logins, payments, and other blockchain services.
+A node.js SDK for quickly building a server that uses DotWallet for Developers' APIs for logins, payments, and other blockchain services.
 
 This SDK automatically handles the refreshing of user and app access tokens and provides common error handling.
 

@@ -6,7 +6,7 @@ import { requestAppAccessToken } from './appAuth';
 
 async function createOrder(orderData: IPaymentOrder, appAccessToken: string, log: boolean = false) {
   try {
-    console.log('==============createOrder orderData==============\n', orderData);
+    if (log) console.log('==============createOrder orderData==============\n', orderData);
     // console.log('==============appAccessToken==============\n', appAccessToken);
     const options: AxiosRequestConfig = {
       headers: {

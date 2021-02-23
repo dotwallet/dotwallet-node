@@ -23,14 +23,14 @@ export interface IUserData {
 }
 
 export interface IPaymentToObject {
-  type: 'address' | 'script';
+  type: 'address' | 'script' | string;
   content: string;
   amount: number;
 }
 
 export interface IOrder {
   out_order_id: string;
-  coin_type: 'BSV' | 'BCH' | 'BSV';
+  coin_type: 'BSV' | 'BCH' | 'ETH' | string;
   to: IPaymentToObject[];
   product: {
     id: string;

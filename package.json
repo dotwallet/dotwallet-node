@@ -10,8 +10,8 @@
   ],
   "scripts": {
     "build": "rm -rf lib && tsc",
-    "test": "jest --coverage --setupFiles dotenv/config",
-    "test:watch": "jest --watchAll --setupFiles dotenv/config"
+    "test": "jest --coverage --detectOpenHandles --setupFiles dotenv/config",
+    "test:watch": "jest --watchAll --detectOpenHandles --setupFiles dotenv/config"
   },
   "repository": {
     "type": "git",

@@ -28,7 +28,7 @@ const options = {
   swaggerDefinition: {
     openapi: '3.0.0',
     info: {
-      title: 'DotWallet Microservice',
+      title: 'DotWallet MicroService',
       version: '1.0.0',
       description: 'A server for using DotWallets APIs',
     },
