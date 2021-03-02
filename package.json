@@ -11,7 +11,7 @@
   "scripts": {
     "build": "rm -rf lib && tsc",
     "test": "jest --coverage --detectOpenHandles --setupFiles dotenv/config",
-    "test:watch": "jest --watchAll --detectOpenHandles --setupFiles dotenv/config"
+    "test-watch": "jest --watchAll --detectOpenHandles --setupFiles dotenv/config"
   },
   "repository": {
     "type": "git",

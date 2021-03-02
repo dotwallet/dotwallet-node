@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon src/index.js",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "test-watch": "env TEST=true jest --watchAll",
+    "test": "env TEST=true jest"
   },
   "keywords": [],
   "author": "",
@@ -23,6 +25,8 @@
     "url": "^0.11.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.6"
+    "jest": "^26.6.3",
+    "nodemon": "^2.0.6",
+    "supertest": "^6.1.3"
   }
 }

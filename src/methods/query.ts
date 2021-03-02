@@ -25,7 +25,7 @@ export const queryTx = ($this: DotWallet) => {
         response = await callApi();
         responseData = response.data;
       } else if (responseData.code !== 200) {
-        return { error: responseData };
+        return { error: response };
       }
       const txInquiry: ITXInquiry = responseData.data;
       return txInquiry;

@@ -36,16 +36,17 @@ class DotWallet {
    * @summary initialize DotWallet with your credentials from DotWallet for Developers
    * @param {boolean} log whether to console.log() internal events
    */
-  init = async (CLIENT_ID: string, CLIENT_SECRET: string, log: boolean = false) => {
+  init = async (CLIENT_ID: string, CLIENT_SECRET: string, log = false) => {
     this.setClientID(CLIENT_ID);
     this.setSecret(CLIENT_SECRET);
-    await requestAppAccessToken(this, log);
+    const appAccessToken = await requestAppAccessToken(this, log);
 
     // the app access token will expire every 2 hours.
     setInterval(async () => {
       requestAppAccessToken(this, log);
     }, 7200000);
     // this.populateStaticMethods();
+    return appAccessToken;
   };
 
   /**
