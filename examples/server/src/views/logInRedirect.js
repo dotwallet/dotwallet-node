@@ -2,7 +2,6 @@ const urlParams = new URLSearchParams(window.location.search);
 const state = urlParams.get('state');
 const code = urlParams.get('code');
 const savedState = localStorage.getItem('loginState');
-console.log(state, savedState);
 
 callAuth = async () => {
   const authCall = await fetch(`${APP_URL}/auth`, {
@@ -16,9 +15,9 @@ callAuth = async () => {
     },
   });
   const authResponse = await authCall.json();
-  console.log('authResponse', authResponse);
-  for (const info in authResponse) {
-    localStorage.setItem(info, authResponse[info]);
+  // console.log({ authResponse });
+  for (const item in authResponse) {
+    localStorage.setItem(item, authResponse[item]);
   }
   const homepageURL = `${APP_URL}/logged-in`;
   // console.log('homepageURL', homepageURL);

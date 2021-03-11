@@ -4,6 +4,8 @@ const DotWallet = require('../../../../lib/index.js');
 const dotwallet = new DotWallet();
 dotwallet.init(CLIENT_ID, CLIENT_SECRET);
 
+dotwallet.saveData();
+
 const { auth } = require('./auth');
 const { autoPay, createOrder, paymentResult } = require('./payment');
 const { saveData } = require('./saveData');

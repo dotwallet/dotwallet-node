@@ -2,7 +2,6 @@
 document.getElementById('store-link').href = window.location.origin + '/store-front';
 // basic payment order info
 const order = {
-  out_order_id: uuidv4(),
   coin_type: 'BSV',
   to: [
     {
@@ -23,23 +22,20 @@ const order = {
 // single payment order
 document.getElementById('banana-button').addEventListener('click', async () => {
   document.getElementById('order-status').innerText = '';
-
-  const orderIDResponse = await fetch(
-    APP_URL + '/create-order', // replace with your IP
-    {
-      method: 'POST',
-      body: JSON.stringify({
-        ...order,
-        redirect_uri: window.location.href, // replace with your IP
-      }),
-      headers: {
-        'Content-type': 'application/json; charset=UTF-8',
-      },
+  order.out_order_id = uuidv4();
+  const orderIDResponse = await fetch(APP_URL + '/create-order', {
+    method: 'POST',
+    body: JSON.stringify({
+      ...order,
+      redirect_uri: window.location.href,
+      server_token: localStorage.getItem('server_token'),
+    }),
+    headers: {
+      'Content-type': 'application/json; charset=UTF-8',
     },
-  );
+  });
   const orderIDData = await orderIDResponse.json();
-  console.log('orderIDData', orderIDData);
-
+  // console.log({ orderIDData });
   if (orderIDData.order_id) {
     window.location.href = `${DOTWALLET_API}/transact/order/apply_payment?order_id=${orderIDData.order_id}`;
   } else document.getElementById('order-status').innerText = 'error: ' + orderIDData;
@@ -47,19 +43,20 @@ document.getElementById('banana-button').addEventListener('click', async () => {
 
 // autopay
 document.getElementById('autopay-button').addEventListener('click', async () => {
-  console.log('clicked');
-  const autoPaymentResponse = await fetch(
-    APP_URL + '/autopay', // replace with your IP
-    {
-      method: 'POST',
-      body: JSON.stringify({ ...order, user_id: localStorage.getItem('id') }),
-      headers: {
-        'Content-type': 'application/json; charset=UTF-8',
-      },
+  order.out_order_id = uuidv4();
+  const autoPaymentResponse = await fetch(APP_URL + '/autopay', {
+    method: 'POST',
+    body: JSON.stringify({
+      ...order,
+      user_id: localStorage.getItem('id'),
+      server_token: localStorage.getItem('server_token'),
+    }),
+    headers: {
+      'Content-type': 'application/json; charset=UTF-8',
     },
-  );
+  });
   const autoPaymentResponseData = await autoPaymentResponse.json();
-  console.log(autoPaymentResponseData);
+  // console.log({ autoPaymentResponseData });
   if (autoPaymentResponseData.txid) document.getElementById('order-status').innerText = 'paid!';
   else if (autoPaymentResponseData.error && autoPaymentResponseData.error === 'balance too low')
     window.location.href = `${DOTWALLET_CLIENT}/wallet/open/transfer?redirect_url=${window.location.href}`;

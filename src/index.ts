@@ -70,10 +70,10 @@ class DotWallet {
   getUserInfo = getUserInfo;
 
   /**
-   * @summary sign an order with your developer key, and send it to dotwallet servers to get an order_sn
+   * @summary sign an order with your developer key, and send it to dotwallet servers to get an order_id
    * @param { IOrderData } orderData a valid order as a js object (see the docs or this IorderData type)
    * @param {boolean} log whether to console.log() internal events
-   * @returns { string } the order_sn
+   * @returns { string } the order_id
    */
   getOrderID = getOrderID(this);
 

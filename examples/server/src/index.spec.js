@@ -3,6 +3,7 @@ const { app } = require('./index.js');
 const DotWallet = require('../../../lib/index');
 const { CLIENT_ID } = require('./config');
 const request = () => supertest(app);
+module.exports = { app, request };
 describe('Setup', () => {
   it('Pings successfully', async () => {
     const res = await request().get('/ping');

@@ -44,7 +44,7 @@ app.post('/autopay', async (req, res) => {
 
 // ***** Save data to the BSV blockchain *****
 app.post('/save-data', async (req, res) => {
-  const saveDataResult = await dotwallet.saveData(req.body.dataToSave, req.body.userID);
+  const saveDataResult = await dotwallet.saveData(req.body.data_to_save, req.body.userID);
   // You will receive back a txid. In a real app this txid would be stored to DB to later check the saved data on the blockchain
 });
 ```
