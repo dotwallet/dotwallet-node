@@ -1,61 +1,48 @@
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
 const { CLIENT_SECRET } = require('../config');
-const checkToken = (req, res, next) => {
+
+const createToken = (userID, expiresIn = '30 days') => {
+  // console.log({ userID, expiresIn }, 1613982737 - 1613986337);
+  const token = jwt.sign({ userID }, CLIENT_SECRET, { expiresIn });
+  const decoded = jwt.verify(token, CLIENT_SECRET, { ignoreExpiration: true });
+  // console.log({ token, decoded }, decoded.iat - decoded.exp);
+  return token;
+};
+
+/** Checks token and returns userID or an console.error;
+ * @returns {{error: any}|string} {{error: any}|string}
+ * @param { string } token The JWT token
+ */
+const checkToken = (token) => {
   try {
-    const token = req.body.serverToken;
-    console.log({ token });
-    if (!token) throw 'no token';
-    jwt.verify(token, CLIENT_SECRET);
-    next();
+    if (!token) throw 'no token received';
+    const decoded = jwt.verify(token, CLIENT_SECRET);
+    if (!decoded) {
+      throw 'invalid token' + JSON.stringify(decoded);
+    }
+    if (!decoded.userID) {
+      throw 'no username found';
+    }
+    return decoded.userID;
   } catch (error) {
-    res.json({ error: 'token validation error: ' + JSON.stringify(error) });
+    return { error };
   }
 };
 
-/**
- * @swagger
- * /example:
- *   post:
- *     summary: "Use the 'code' from a user login response to get the user_access_token, server_token, and user info."
- *     consumes: [application/json]
- *     produces: [application/json]
- *     parameters:
- *       - name: "param_name"
- *         description: "매개변수"
- *         in: body
- *         required: true
- *         type: string
- *         example: "foo"
- *     responses:
- *       200:
- *         description: "성공"
- *         schema:
- *           type: object
- *           properties:
- *             success:
- *               description: "성공 여부"
- *               type: boolean
- *               example: true
- *       400:
- *         description: "잘못된 매개변수"
- *         schema:
- *           type: object
- *           properties:
- *             success:
- *               description: "성공 여부"
- *               type: boolean
- *               example: false
- *       500:
- *         description: "서버 오류"
- *         schema:
- *           type: object
- *           properties:
- *             success:
- *               description: "성공 여부"
- *               type: boolean
- *               example: false
+/** checks a token from request body, if valid moves to next()
+ * @param {{body: {server_token: string}}} req
  */
+const checkTokenMiddleWare = (req, res, next) => {
+  try {
+    const userID = checkToken(req.body.server_token);
+    if (typeof userID === 'string' && !userID.error) next();
+    else throw userID.error;
+  } catch (error) {
+    console.log({ error });
+    res.json({ error: 'token validation error: ' + JSON.stringify(error) });
+  }
+};
 
 /**
  * @swagger
@@ -143,15 +130,13 @@ const checkToken = (req, res, next) => {
  */
 const auth = (app, dotwallet) =>
   app.post('/auth', async (req, res) => {
-    console.log({ reqBody: req.body });
     const authTokenData = await dotwallet.getUserToken(req.body.code, req.body.redirect_uri, true);
     const userAccessToken = authTokenData.access_token;
-    console.log('userAccessToken', userAccessToken);
     const userInfo = await dotwallet.getUserInfo(userAccessToken, true);
 
-    const token = jwt.sign({ userID: userInfo.id }, CLIENT_SECRET, { expiresIn: '60d' });
-    const returnData = { ...userInfo, ...authTokenData, server_token: token };
-    console.log({ returnData });
+    const serverToken = createToken(userInfo.id);
+    const returnData = { ...userInfo, ...authTokenData, server_token: serverToken };
+    // console.log({ returnData });
     res.json(returnData);
     // optionally alert your main backend server that the login was successful, and send the info there.
     // subsequent requests can be made from server or client as long as they have a valid token
@@ -160,4 +145,4 @@ const auth = (app, dotwallet) =>
     }
   });
 
-module.exports = { auth, checkToken };
+module.exports = { auth, checkToken, checkTokenMiddleWare };
