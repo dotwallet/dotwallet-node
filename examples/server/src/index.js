@@ -48,6 +48,7 @@ module.exports = { app };
 if (process.env.TEST !== 'true')
   app.listen(PORT, () =>
     console.log(
-      `DotWallet example app listening at ${process.env.NODE_ENV === 'production' ? 'production host' : appUrl}`,
+      `DotWallet example app listening at ${process.env.NODE_ENV === 'production' ? 'production host' : appUrl}\n
+      API docs available at ${process.env.NODE_ENV === 'production' ? 'production host' : appUrl}/docs`,
     ),
   );

@@ -13,3 +13,13 @@ Run with
 ```bash
 npm run start
 ```
+
+Test with
+
+```
+npm run test
+# or in watch mode:
+npm run test-watch
+```
+
+View the API docs at localhost/docs

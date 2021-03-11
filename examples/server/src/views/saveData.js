@@ -1,5 +1,5 @@
 // Save data on chain (with autopay)
-const dataToSave = {
+const data_to_save = {
   bananas: 546,
   moreBananas: 746,
   yetMoreBananas: 946,
@@ -9,14 +9,18 @@ document.getElementById('save-data').addEventListener('click', async () => {
     APP_URL + '/save-data', // replace with your IP
     {
       method: 'POST',
-      body: JSON.stringify({ dataToSave, userID: localStorage.getItem('id') }),
+      body: JSON.stringify({
+        data_to_save,
+        user_id: localStorage.getItem('id'),
+        server_token: localStorage.getItem('server_token'),
+      }),
       headers: {
         'Content-type': 'application/json; charset=UTF-8',
       },
     },
   );
   const responseData = await response.json();
-  console.log('saveDataResponseData', responseData);
+  // console.log('saveDataResponseData', responseData);
   if (responseData.txid) {
     document.getElementById('order-status').innerText = `Saved!`;
     document.getElementById('check-data-link').href = `https://satoshi.io/tx/${responseData.txid}`;
@@ -32,13 +36,13 @@ document.getElementById('save-data').addEventListener('click', async () => {
   async function checkData(txid) {
     const response = await fetch(APP_URL + '/get-tx-data', {
       method: 'POST',
-      body: JSON.stringify({ txid }),
+      body: JSON.stringify({ txid, server_token: localStorage.getItem('server_token') }),
       headers: {
         'Content-type': 'application/json; charset=UTF-8',
       },
     });
     const data = await response.json();
-    console.log('checkDataResponseData', data);
+    // console.log('checkDataResponseData', data);
     document.getElementById('check-data-display').innerText = JSON.stringify(data);
   }
 });
