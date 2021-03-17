@@ -27,7 +27,7 @@ const validOrder = {
 describe('POST /create-order', () => {
   it('can create an order_id', async () => {
     const res = await request().post('/create-order').send(validOrder);
-    console.log({ res: res.body });
+    // console.log({ res: res.body });
     expect(res.body.order_id.length).toBeGreaterThan(15);
   });
 });
