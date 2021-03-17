@@ -1,8 +1,8 @@
 {
   "name": "example-dotwallet-server",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "a microservice for working with DotWallet APIs",
+  "main": "src/index.js",
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
