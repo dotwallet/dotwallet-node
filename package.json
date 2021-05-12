@@ -1,15 +1,15 @@
 {
   "name": "@dotwallet/sdk-node",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "SDK for backend servers interacting with DotWallet for Developers APIs",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
-    "lib/**/*",
+    "dist/**/*",
     "examples/**/*"
   ],
   "scripts": {
-    "build": "rm -rf lib && tsc",
+    "build": "rm -rf dist && tsc",
     "test": "jest --coverage --detectOpenHandles --setupFiles dotenv/config",
     "test-watch": "jest --watchAll --detectOpenHandles --setupFiles dotenv/config",
     "pub": "yarn publish --access=public"
