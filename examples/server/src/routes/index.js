@@ -1,5 +1,5 @@
 const { CLIENT_ID, CLIENT_SECRET } = require('../config');
-const DotWallet = require('../../../../lib/index.js');
+const DotWallet = require('../../../../dist/index.js');
 // const DotWallet = require('dotwallet-node'); //in a real app
 const dotwallet = new DotWallet();
 dotwallet.init(CLIENT_ID, CLIENT_SECRET);

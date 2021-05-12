@@ -16,7 +16,7 @@
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
-    "dotwallet-node": "^1.0.1",
+    "@dotwallet/sdk-node": "^1.0.4",
     "express": "^4.17.1",
     "ip": "^1.1.5",
     "jsonwebtoken": "^8.5.1",

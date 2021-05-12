@@ -44,7 +44,7 @@ it('does not accept wrong coin type', async () => {
     throw 'error not thrown';
   }
   expect(orderID.error.code).toBe(10180001);
-  expect(orderID.error.msg).toBe('CoinType must be one of [BSV TOKEN-BTC TOKEN-ETH]');
+  expect(orderID.error.msg).toContain('CoinType');
 });
 it('does not accept invalid URL', async () => {
   const inValidOrder = JSON.parse(JSON.stringify(order));
@@ -56,7 +56,7 @@ it('does not accept invalid URL', async () => {
     throw 'error not thrown';
   }
   expect(orderID.error.code).toBe(10180001);
-  expect(orderID.error.msg).toBe('NotifyUrl must be a valid URL');
+  expect(orderID.error.msg).toContain('NotifyUrl');
 });
 it('does not accept invalid URL', async () => {
   const inValidOrder = JSON.parse(JSON.stringify(order));
@@ -68,5 +68,5 @@ it('does not accept invalid URL', async () => {
     throw 'error not thrown';
   }
   expect(orderID.error.code).toBe(10180001);
-  expect(orderID.error.msg).toBe('OutOrderID is a required field');
+  expect(orderID.error.msg).toContain('OutOrderID');
 });

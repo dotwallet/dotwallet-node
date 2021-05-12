@@ -7,14 +7,14 @@ This SDK automatically handles the refreshing of user and app access tokens and 
 ## To use
 
 ```bash
-npm install dotwallet-node
+npm install @dotwallet/sdk-node
 ```
 
 ```js
 const express = require('express'); // or Koa, etc.
 const app = express();
 
-const DotWallet = require('dotwallet-node');
+const DotWallet = require('@dotwallet/sdk-node');
 const dotwallet = new DotWallet();
 // Initialize DotWallet with your client_id and secret
 dotwallet.init('<YOUR_CLIENT_ID>', '<YOUR_CLIENT_SECRET>', true);
@@ -60,7 +60,7 @@ npm i
 npm run build
 ```
 
-will build to 'lib' folder
+will build to 'dist' folder
 
 ### run example
 

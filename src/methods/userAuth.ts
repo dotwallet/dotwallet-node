@@ -14,10 +14,14 @@ export const getUserToken = ($this: DotWallet) => {
         code: code,
         redirect_uri: redirectUri,
       };
-      console.log(data);
       const accessTokenRequest = await axios.post(`${DOTWALLET_API}/oauth2/get_access_token`, data);
       if (log) console.log('==============getUserToken result==============\n', accessTokenRequest.data);
-      if (!accessTokenRequest.data.data.access_token || accessTokenRequest.data.code !== 0) throw accessTokenRequest;
+      if (
+        !accessTokenRequest.data.data ||
+        !accessTokenRequest.data.data.access_token ||
+        accessTokenRequest.data.code !== 0
+      )
+        throw accessTokenRequest.data;
       else {
         const result: IUserAccessTokenData = {
           ...accessTokenRequest.data.data,
@@ -42,8 +46,10 @@ export const getUserInfo = async (userAccessToken: string, log: boolean = false)
       method: 'POST',
     };
     const userInfoRequest = await axios(`${DOTWALLET_API}/user/get_user_info`, options);
-    if (log) console.log('==============getUserInfo result==============\n', userInfoRequest.data);
-    return userInfoRequest.data.data as IUserData;
+    const resData = userInfoRequest.data;
+    if (log) console.log('==============getUserInfo result==============\n', resData);
+    if (!resData.data || !resData.data.id) throw userInfoRequest;
+    else return resData.data as IUserData;
   } catch (error) {
     if (log) console.log('==============getUserInfo ERROR==============\n', error);
     return { error };
@@ -60,15 +66,10 @@ export const refreshUserToken = ($this: DotWallet) => {
         refresh_token: refreshToken,
       };
       const accessTokenRequest = await axios.post(`${DOTWALLET_API}/oauth2/get_access_token`, data);
-      if (log) console.log('==============refresh access token result==============\n', accessTokenRequest.data);
-
-      if (!accessTokenRequest.data.data.access_token || accessTokenRequest.data.code !== 0) throw accessTokenRequest;
-      else {
-        const result: IUserAccessTokenData = {
-          ...accessTokenRequest.data.data,
-        };
-        return result;
-      }
+      const resData = accessTokenRequest.data;
+      if (log) console.log('==============refresh access token result==============\n', resData);
+      if (!resData.data || !resData.data.access_token || resData.code !== 0) throw accessTokenRequest;
+      else return resData.data as IUserAccessTokenData;
     } catch (error) {
       if (log) console.log('==============refreshUserToken ERROR==============\n', error);
       return { error };

@@ -1,6 +1,6 @@
 const supertest = require('supertest');
 const { app } = require('./index.js');
-const DotWallet = require('../../../lib/index');
+const DotWallet = require('../../../dist/index');
 const { CLIENT_ID } = require('./config');
 const request = () => supertest(app);
 module.exports = { app, request };
