@@ -1,6 +1,6 @@
 {
   "name": "@dotwallet/sdk-node",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "SDK for backend servers interacting with DotWallet for Developers APIs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
