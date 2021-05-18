@@ -39,7 +39,7 @@ const checkTokenMiddleWare = (req, res, next) => {
     if (typeof userID === 'string' && !userID.error) next();
     else throw userID.error;
   } catch (error) {
-    console.log({ error });
+    console.error({ error });
     res.json({ error: 'token validation error: ' + JSON.stringify(error) });
   }
 };

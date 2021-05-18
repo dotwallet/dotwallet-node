@@ -120,6 +120,12 @@ const createOrder = (app, dotwallet) =>
     }
   });
 
+/**
+* @swagger
+* /payment-result:
+*   post:
+*     summary: receives a payment result notification and prints to console
+*/
 const paymentResult = (app) =>
   app.post('/payment-result', (req, res) => {
     // the response from 'notice_uri' will be in the request queries
